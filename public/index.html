@@ -1,1 +1,2055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VetSchedule</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1117;--surf:#181c27;--surf2:#1f2436;--surf3:#252b3b;
+  --bdr:#2c3347;--bdr2:#3a4260;
+  --tx:#e8eaf0;--tx2:#9aa0b8;--tx3:#5c6480;
+  --acc:#4f8ef7;--acc-d:#1e3a6e;
+  --grn:#34d399;--grn-d:#0d3d29;
+  --red:#f87171;--red-d:#3d1515;
+  --yel:#fbbf24;--yel-d:#3d2e09;
+  --pur:#a78bfa;--pur-d:#2d1f5e;
+  --org:#fb923c;--org-d:#3d1e09;
+  --teal:#2dd4bf;--teal-d:#0d3d38;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tx);font-size:14px;min-height:100vh}
+header{background:var(--surf);border-bottom:1px solid var(--bdr);padding:0 1.5rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.logo{font-family:'Libre Baskerville',serif;font-size:1.1rem;color:var(--tx)}.logo span{color:var(--acc)}
+nav{display:flex;gap:2px}
+.nav-btn{background:none;border:none;color:var(--tx2);font-family:'IBM Plex Sans',sans-serif;font-size:.82rem;font-weight:500;padding:.4rem 1rem;border-radius:6px;cursor:pointer;transition:all .12s}
+.nav-btn:hover{color:var(--tx);background:var(--surf2)}
+.nav-btn.active{color:var(--acc);background:var(--acc-d)}
+.week-pill{font-size:.75rem;color:var(--tx2);background:var(--surf2);border:1px solid var(--bdr);padding:.28rem .75rem;border-radius:20px;cursor:pointer;transition:all .12s}
+.week-pill:hover{border-color:var(--bdr2)}
+.page{display:none;max-width:1700px;margin:0 auto;padding:1.5rem}
+.page.active{display:block}
+.ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem}
+.ph-title{font-family:'Libre Baskerville',serif;font-size:1.4rem}
+.ph-sub{font-size:.78rem;color:var(--tx3);margin-top:3px}
+.card{background:var(--surf);border:1px solid var(--bdr);border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+.slbl{font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--tx3);margin-bottom:.65rem;padding-bottom:.45rem;border-bottom:1px solid var(--bdr)}
+.btn{display:inline-flex;align-items:center;gap:.35rem;padding:.42rem 1rem;border-radius:7px;font-family:'IBM Plex Sans',sans-serif;font-size:.82rem;font-weight:500;cursor:pointer;border:none;transition:all .12s}
+.btn-pri{background:var(--acc);color:#fff}.btn-pri:hover{background:#3a7df5}
+.btn-ghost{background:var(--surf2);color:var(--tx2);border:1px solid var(--bdr)}.btn-ghost:hover{color:var(--tx);border-color:var(--bdr2)}
+.btn-grn{background:var(--grn-d);color:var(--grn);border:1px solid #1a5c40}.btn-grn:hover{background:#0f4d33}
+.btn-sm{padding:.28rem .65rem;font-size:.75rem}
+.btn-xs{padding:.18rem .48rem;font-size:.7rem}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:.7rem;margin-bottom:1.5rem}
+.stat-box{background:var(--surf);border:1px solid var(--bdr);border-radius:10px;padding:.9rem 1rem}
+.stat-v{font-family:'Libre Baskerville',serif;font-size:1.75rem;font-weight:700;line-height:1}
+.stat-l{font-size:.68rem;color:var(--tx3);margin-top:3px;text-transform:uppercase;letter-spacing:.06em}
+.stag{font-size:.6rem;font-weight:700;padding:.12rem .38rem;border-radius:3px}
+.s-solo{background:#1a3d27;color:var(--grn)}.s-mentor{background:#1e2d5e;color:var(--acc)}
+.s-ind{background:#2d2030;color:var(--pur)}.s-dir{background:#2d2318;color:var(--org)}.s-none{background:var(--surf2);color:var(--tx3)}
+.hbar{height:4px;background:var(--surf3);border-radius:2px;overflow:hidden}
+.hbar-fill{height:100%;border-radius:2px}
+.badge{display:inline-flex;align-items:center;font-size:.7rem;font-weight:700;padding:.18rem .48rem;border-radius:4px}
+.b-ok{background:var(--grn-d);color:var(--grn)}.b-warn{background:var(--yel-d);color:var(--yel)}
+.b-err{background:var(--red-d);color:var(--red)}.b-ov{background:var(--acc-d);color:var(--acc)}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{text-align:left;padding:.45rem .7rem;font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3);background:var(--surf2);border-bottom:1px solid var(--bdr)}
+.tbl td{padding:.5rem .7rem;border-bottom:1px solid var(--bdr);font-size:.82rem;vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:var(--surf2)}
+.sdot{width:6px;height:6px;border-radius:50%;flex-shrink:0;display:inline-block}
+.conf-row{padding:.5rem .75rem;border-radius:7px;font-size:.78rem;margin-bottom:.3rem;border:1px solid}
+.conf-err{background:var(--red-d);border-color:#5a1f1f;color:var(--red)}
+.conf-warn{background:var(--yel-d);border-color:#5a3d09;color:var(--yel)}
+/* SCHEDULE */
+.sched-grid{display:grid;grid-template-columns:210px 1fr;gap:1.25rem}
+.day-list{display:flex;flex-direction:column;gap:.4rem}
+.day-item{background:var(--surf);border:1px solid var(--bdr);border-radius:9px;padding:.75rem .9rem;cursor:pointer;transition:all .12s}
+.day-item:hover{border-color:var(--bdr2)}.day-item.sel{border-color:var(--acc);background:var(--acc-d)}
+.dg{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:.5rem;margin-bottom:1rem}
+.dc{border-radius:8px;padding:.6rem .75rem;border:1px solid var(--bdr)}
+.slot-row{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:.35rem;padding:.25rem .55rem;border-radius:5px;font-size:.73rem;font-weight:500;border:1px solid;background:rgba(255,255,255,.04)}
+.chip-x{background:none;border:none;cursor:pointer;font-size:.78rem;opacity:.45;padding:0;line-height:1;color:var(--tx)}.chip-x:hover{opacity:1}
+.add-btn{display:inline-flex;align-items:center;gap:.28rem;padding:.25rem .55rem;border-radius:5px;font-size:.71rem;background:var(--surf3);border:1px dashed var(--bdr2);color:var(--tx3);cursor:pointer;transition:all .12s}
+.add-btn:hover{color:var(--tx);border-color:var(--acc)}
+/* ROSTER */
+.roster-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:.7rem}
+.pool-filter-btn{padding:.28rem .75rem;border-radius:20px;font-size:.72rem;font-weight:700;border:1.5px solid var(--bdr2);background:var(--surf2);color:var(--tx3);cursor:pointer;transition:all .12s}
+.pool-filter-btn.pf-active{border-color:currentColor}
+.pool-section-hdr{grid-column:1/-1;display:flex;align-items:center;gap:.65rem;padding:.5rem 0 .35rem;border-bottom:1px solid var(--bdr);margin-bottom:.3rem}
+.pool-section-lbl{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em}
+.pool-section-count{font-size:.68rem;color:var(--tx3)}
+.rc{background:var(--surf);border:1px solid var(--bdr);border-radius:10px;padding:.9rem;cursor:pointer;transition:border-color .15s}
+.rc:hover{border-color:var(--acc)}
+.day-dots{display:flex;gap:2px;margin:.5rem 0}
+.dd{width:22px;height:22px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700}
+.dd-on{background:var(--acc-d);color:var(--acc)}.dd-pt{background:var(--yel-d);color:var(--yel)}.dd-off{background:var(--surf2);color:var(--tx3)}
+/* PICKER */
+#picker-drop{position:fixed;z-index:500;background:var(--surf2);border:1px solid var(--bdr2);border-radius:10px;min-width:270px;max-height:300px;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.6);display:none}
+.pk-lbl{font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--tx3);padding:.5rem .85rem .2rem}
+.pk-row{display:flex;align-items:center;gap:.55rem;padding:.42rem .85rem;cursor:pointer;font-size:.82rem;transition:background .1s}
+.pk-row:hover{background:var(--surf3)}.pk-row.dim{opacity:.35;cursor:not-allowed}.pk-row.dim:hover{background:none}
+/* PROFILE DRAWER */
+#profile-drawer{position:fixed;top:0;right:0;bottom:0;width:680px;max-width:100vw;background:var(--surf);border-left:1px solid var(--bdr2);z-index:200;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s cubic-bezier(.25,.46,.45,.94);overflow:hidden}
+#profile-drawer.open{transform:translateX(0)}
+#drawer-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0);z-index:199;pointer-events:none;transition:background .25s}
+#drawer-backdrop.open{background:rgba(0,0,0,.55);pointer-events:all}
+.dwr-hdr{padding:1.25rem 1.5rem;border-bottom:1px solid var(--bdr);background:var(--surf2);flex-shrink:0}
+.dwr-hdr-top{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}
+.dwr-name{font-family:'Libre Baskerville',serif;font-size:1.5rem;line-height:1.1;margin-bottom:.25rem}
+.dwr-id{font-size:.73rem;color:var(--tx3)}
+.dwr-badges{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.7rem}
+.dbadge{font-size:.68rem;font-weight:600;padding:.2rem .55rem;border-radius:20px;border:1px solid}
+.dwr-close{background:none;border:1px solid var(--bdr2);color:var(--tx3);font-size:1rem;cursor:pointer;width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;transition:all .12s;flex-shrink:0}
+.dwr-close:hover{color:var(--tx);background:var(--surf3)}
+.dwr-tabs{display:flex;border-bottom:1px solid var(--bdr);background:var(--surf2);padding:0 1.5rem;flex-shrink:0;overflow-x:auto}
+.dtab{background:none;border:none;color:var(--tx3);font-family:'IBM Plex Sans',sans-serif;font-size:.8rem;font-weight:500;padding:.65rem .85rem;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .12s;white-space:nowrap;position:relative}
+.dtab:hover{color:var(--tx2)}.dtab.active{color:var(--acc);border-bottom-color:var(--acc)}
+.dirty-pip{width:5px;height:5px;border-radius:50%;background:var(--yel);position:absolute;top:9px;right:3px;display:none}
+.dirty-pip.on{display:block}
+.dwr-body{flex:1;overflow-y:auto;padding:1.5rem;-webkit-overflow-scrolling:touch}
+.dpanel{display:none}.dpanel.active{display:block}
+.dwr-foot{padding:1rem 1.5rem;border-top:1px solid var(--bdr);background:var(--surf2);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:1rem}
+.unsaved-note{font-size:.75rem;color:var(--yel);display:none;align-items:center;gap:.4rem}
+.unsaved-note.on{display:flex}
+.unsaved-dot{width:7px;height:7px;border-radius:50%;background:var(--yel)}
+/* OVERVIEW */
+.active-row{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.1rem;background:var(--surf2);border:1px solid var(--bdr);border-radius:10px;margin-bottom:.75rem}
+.big-tog{position:relative;width:48px;height:26px;cursor:pointer;display:block}
+.big-tog input{position:absolute;opacity:0;width:0;height:0}
+.big-tog-track{position:absolute;inset:0;background:var(--surf3);border:1px solid var(--bdr2);border-radius:30px;transition:all .2s}
+.big-tog input:checked+.big-tog-track{background:var(--grn);border-color:var(--grn)}
+.big-tog-knob{position:absolute;top:4px;left:4px;width:18px;height:18px;background:#666;border-radius:50%;transition:all .2s;pointer-events:none}
+.big-tog input:checked~.big-tog-knob{transform:translateX(22px);background:#fff}
+.pstat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:1rem}
+.pstat{background:var(--surf2);border:1px solid var(--bdr);border-radius:8px;padding:.65rem .8rem;text-align:center}
+.pstat-v{font-family:'Libre Baskerville',serif;font-size:1.4rem;font-weight:700;line-height:1}
+.pstat-l{font-size:.62rem;color:var(--tx3);margin-top:3px;text-transform:uppercase;letter-spacing:.05em}
+.sh-row{display:flex;align-items:center;gap:.6rem;padding:.4rem .65rem;background:var(--surf2);border:1px solid var(--bdr);border-radius:7px;font-size:.78rem;margin-bottom:.3rem}
+/* SKILLS */
+.skill-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:.45rem}
+.skill-row{display:flex;align-items:center;justify-content:space-between;background:var(--surf2);border:1px solid var(--bdr);border-radius:7px;padding:.5rem .75rem}
+.skill-row:hover{border-color:var(--bdr2)}
+.sk-sel{background:var(--surf3);border:1px solid var(--bdr2);border-radius:5px;color:var(--tx);font-family:'IBM Plex Sans',sans-serif;font-size:.75rem;padding:.2rem .45rem;cursor:pointer}
+.sk-sel:focus{outline:none;border-color:var(--acc)}.sk-sel option{background:var(--surf2)}
+/* AVAIL */
+.avail-day{display:grid;grid-template-columns:88px 1fr 1fr;align-items:center;gap:.6rem;padding:.5rem .75rem;background:var(--surf3);border:1px solid var(--bdr);border-radius:7px;margin-bottom:.4rem}
+.avail-slot{display:flex;align-items:center;gap:.45rem}
+.avail-lbl{font-size:.67rem;color:var(--tx3);width:18px;font-weight:700}
+.tog{position:relative;width:34px;height:18px;cursor:pointer;display:block;flex-shrink:0}
+.tog input{position:absolute;opacity:0;width:0;height:0}
+.tog-track{position:absolute;inset:0;background:var(--surf2);border:1px solid var(--bdr2);border-radius:20px;transition:all .18s}
+.tog input:checked+.tog-track{background:var(--acc);border-color:var(--acc)}
+.tog-knob{position:absolute;top:3px;left:3px;width:12px;height:12px;background:#666;border-radius:50%;transition:all .18s;pointer-events:none}
+.tog input:checked~.tog-knob{transform:translateX(16px);background:#fff}
+/* BASE AVAIL BLOCKS */
+.bab-list{display:flex;flex-direction:column;gap:.55rem;margin-bottom:1rem}
+.bab-card{background:var(--surf2);border:1px solid var(--bdr);border-radius:10px;overflow:hidden;transition:border-color .15s}
+.bab-card:hover{border-color:var(--bdr2)}.bab-card.bab-now{border-color:var(--grn)}.bab-card.bab-err{border-color:var(--red)}
+.bab-hdr{display:flex;align-items:center;gap:.7rem;padding:.7rem .9rem;cursor:pointer;user-select:none}
+.bab-chev{font-size:.65rem;color:var(--tx3);transition:transform .15s;flex-shrink:0}
+.bab-card.bab-open .bab-chev{transform:rotate(90deg)}
+.bab-name{font-weight:600;font-size:.86rem;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bab-range-lbl{font-size:.7rem;color:var(--tx3);white-space:nowrap;flex-shrink:0}
+.bab-badge{font-size:.6rem;font-weight:700;padding:.1rem .35rem;border-radius:3px;white-space:nowrap;flex-shrink:0}
+.bab-badge-now{background:var(--grn-d);color:var(--grn)}.bab-badge-future{background:var(--acc-d);color:var(--acc)}.bab-badge-past{background:var(--surf3);color:var(--tx3)}
+.bab-mini{display:flex;gap:3px;align-items:flex-end;flex-shrink:0}
+.bab-mini-col{display:flex;flex-direction:column;gap:2px;align-items:center}
+.bab-mini-lbl{font-size:.52rem;color:var(--tx3);font-weight:700;line-height:1}
+.bab-mini-am{width:9px;height:9px;border-radius:2px}.bab-mini-pm{width:9px;height:9px;border-radius:2px}
+.bm-on{background:var(--acc)}.bm-pm{background:var(--pur)}.bm-off{background:var(--surf3);opacity:.4}
+.bab-rm{background:none;border:none;color:var(--tx3);cursor:pointer;font-size:.85rem;padding:.15rem .3rem;transition:color .12s;flex-shrink:0}.bab-rm:hover{color:var(--red)}
+.bab-body{border-top:1px solid var(--bdr);padding:.85rem .9rem;display:none}
+.bab-card.bab-open .bab-body{display:block}
+.bab-fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem;margin-bottom:.75rem;align-items:end}
+.flbl{font-size:.67rem;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:.3rem}
+.di{background:var(--surf3);border:1px solid var(--bdr2);border-radius:7px;color:var(--tx);font-family:'IBM Plex Sans',sans-serif;font-size:.82rem;padding:.4rem .6rem;width:100%}
+.di:focus{outline:none;border-color:var(--acc)}
+.add-bab-wrap{background:var(--surf2);border:1px dashed var(--bdr2);border-radius:10px;padding:.9rem 1rem;margin-bottom:1rem;display:none}
+.add-bab-wrap.open{display:block}
+.overlap-err{background:var(--red-d);border:1px solid #5a1f1f;border-radius:7px;padding:.5rem .75rem;font-size:.77rem;color:var(--red);margin-bottom:.65rem;display:none}
+.overlap-err.on{display:block}
+.no-bab-msg{font-size:.8rem;color:var(--tx3);padding:.5rem 0;margin-bottom:.75rem}
+/* CAL */
+.cal-wrap{background:var(--surf2);border:1px solid var(--bdr);border-radius:10px;padding:.9rem;margin-bottom:.75rem}
+.cal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem}
+.cal-nav{background:none;border:1px solid var(--bdr2);color:var(--tx2);border-radius:5px;width:26px;height:26px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s}
+.cal-nav:hover{border-color:var(--acc);color:var(--tx)}
+.cal-g{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cdow{font-size:.61rem;font-weight:700;color:var(--tx3);text-align:center;padding:.2rem 0;text-transform:uppercase}
+.cday{aspect-ratio:1;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:.7rem;background:var(--surf3);border:1px solid transparent;cursor:pointer;transition:all .12s;user-select:none}
+.cday:hover:not(.cempty):not(.cpast){border-color:var(--acc);color:var(--acc)}
+.cempty{background:transparent;cursor:default;pointer-events:none}
+.cpast{opacity:.28;cursor:not-allowed;pointer-events:none}
+.ctoday{border-color:var(--bdr2);font-weight:700;color:var(--acc)}
+.coff{background:var(--red-d);border-color:#5a1f1f;color:var(--red)}
+.cam{background:var(--yel-d);border-color:#5a3d09;color:var(--yel)}
+.cpm{background:var(--pur-d);border-color:#4a2f8e;color:var(--pur)}
+.cdot{width:4px;height:4px;border-radius:50%;margin-top:2px}
+.ov-row{display:flex;align-items:center;justify-content:space-between;padding:.38rem .6rem;background:var(--surf3);border:1px solid var(--bdr);border-radius:6px;font-size:.77rem;margin-bottom:.3rem}
+.ov-rm{background:none;border:none;color:var(--tx3);cursor:pointer;font-size:.8rem;padding:0 .2rem}.ov-rm:hover{color:var(--red)}
+#cal-pop{position:fixed;z-index:600;background:var(--surf2);border:1px solid var(--bdr2);border-radius:10px;padding:.85rem;min-width:175px;box-shadow:0 8px 32px rgba(0,0,0,.7);display:none}
+.cp-opt{display:flex;align-items:center;gap:.45rem;padding:.35rem .55rem;border-radius:6px;font-size:.78rem;cursor:pointer;transition:background .1s}
+.cp-opt:hover{background:var(--surf3)}
+/* PREFS */
+.pref-area-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:.4rem;margin-bottom:1rem}
+.pref-card{background:var(--surf2);border:2px solid var(--bdr);border-radius:8px;padding:.5rem .7rem;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:space-between}
+.pref-card:hover{border-color:var(--bdr2)}.pref-like{border-color:var(--grn)!important;background:var(--grn-d)}.pref-avoid{border-color:var(--red)!important;background:var(--red-d)}
+.spref-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem}
+.spref-btn{padding:.3rem .85rem;border-radius:20px;font-size:.78rem;font-weight:600;border:1.5px solid var(--bdr2);background:var(--surf2);color:var(--tx3);cursor:pointer;transition:all .12s}
+.spref-btn.sp-am{border-color:var(--yel);color:var(--yel);background:var(--yel-d)}
+.spref-btn.sp-pm{border-color:var(--pur);color:var(--pur);background:var(--pur-d)}
+.spref-btn.sp-none{border-color:var(--tx3);color:var(--tx3)}
+textarea{background:var(--surf2);border:1px solid var(--bdr2);border-radius:7px;color:var(--tx);font-family:'IBM Plex Sans',sans-serif;font-size:.85rem;padding:.45rem .7rem;width:100%;resize:vertical;min-height:70px;transition:border-color .12s}
+textarea:focus{outline:none;border-color:var(--acc)}
+select{background:var(--surf2);border:1px solid var(--bdr2);border-radius:7px;color:var(--tx);font-family:'IBM Plex Sans',sans-serif;font-size:.85rem;padding:.45rem .7rem;width:100%;cursor:pointer}
+select:focus{outline:none;border-color:var(--acc)}
+select option{background:var(--surf2)}
+input[type=text],input[type=number],input[type=date]{background:var(--surf2);border:1px solid var(--bdr2);border-radius:7px;color:var(--tx);font-family:'IBM Plex Sans',sans-serif;font-size:.85rem;padding:.45rem .7rem;width:100%}
+input:focus{outline:none;border-color:var(--acc)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem}
+/* RULES */
+.rule-item{display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem;padding:.7rem .9rem;background:var(--surf2);border:1px solid var(--bdr);border-radius:9px;margin-bottom:.45rem}
+.rule-type-badge{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:.1rem .38rem;border-radius:3px;display:inline-block;margin-bottom:.3rem}
+.rt-max{background:var(--yel-d);color:var(--yel)}.rt-pair{background:var(--pur-d);color:var(--pur)}
+.rt-require{background:var(--acc-d);color:var(--acc)}.rt-restrict{background:var(--red-d);color:var(--red)}.rt-note{background:var(--surf3);color:var(--tx2)}
+.rule-rm{background:none;border:none;color:var(--tx3);cursor:pointer;font-size:.85rem;padding:.2rem}.rule-rm:hover{color:var(--red)}
+.rule-type-btns{display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:.75rem}
+.rtbtn{padding:.28rem .65rem;border-radius:20px;font-size:.73rem;font-weight:600;border:1.5px solid var(--bdr2);background:var(--surf3);color:var(--tx3);cursor:pointer;transition:all .12s}
+.rtbtn.sel{border-color:var(--acc);color:var(--acc);background:var(--acc-d)}
+.add-rule-box{background:var(--surf2);border:1px solid var(--bdr2);border-radius:10px;padding:1rem;margin-top:.5rem}
+
+/* ══════════════════════════════════════
+   SETTINGS PAGE
+══════════════════════════════════════ */
+.settings-layout{display:grid;grid-template-columns:200px 1fr;gap:1.5rem;align-items:start}
+.settings-nav{position:sticky;top:72px}
+.snav-item{display:flex;align-items:center;gap:.6rem;padding:.55rem .85rem;border-radius:8px;font-size:.82rem;font-weight:500;color:var(--tx2);cursor:pointer;transition:all .12s;margin-bottom:2px;border:none;background:none;width:100%;text-align:left}
+.snav-item:hover{color:var(--tx);background:var(--surf2)}
+.snav-item.active{color:var(--acc);background:var(--acc-d)}
+.snav-sep{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--tx3);padding:.7rem .85rem .3rem;margin-top:.25rem}
+.spanel{display:none}.spanel.active{display:block}
+
+/* AREA RULES TABLE */
+.area-rules-tbl{width:100%;border-collapse:collapse}
+.area-rules-tbl th{text-align:left;padding:.5rem .75rem;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3);background:var(--surf2);border-bottom:1px solid var(--bdr)}
+.area-rules-tbl td{padding:.55rem .75rem;border-bottom:1px solid var(--bdr);vertical-align:middle;font-size:.82rem}
+.area-rules-tbl tr:last-child td{border-bottom:none}
+.area-rules-tbl tr:hover td{background:rgba(255,255,255,.02)}
+.area-dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex-shrink:0}
+.rule-chip{font-size:.68rem;font-weight:700;padding:.15rem .45rem;border-radius:4px;background:var(--surf3);border:1px solid var(--bdr2);color:var(--tx2)}
+.rule-chip.fixed{background:var(--acc-d);color:var(--acc);border-color:#2a4a8e}
+.rule-chip.perdoc{background:var(--pur-d);color:var(--pur);border-color:#3d2a6e}
+
+/* DOCTOR SCHEDULE */
+.week-tabs{display:flex;gap:3px;margin-bottom:1rem;flex-wrap:wrap}
+.week-tab{padding:.35rem .85rem;border-radius:6px;font-size:.8rem;font-weight:600;cursor:pointer;border:1.5px solid var(--bdr2);background:var(--surf2);color:var(--tx3);transition:all .12s}
+.week-tab:hover{border-color:var(--bdr2);color:var(--tx2)}
+.week-tab.active{background:var(--acc-d);border-color:var(--acc);color:var(--acc)}
+.dr-grid-wrap{overflow-x:auto}
+.dr-grid{border-collapse:collapse;min-width:700px;width:100%}
+.dr-grid th{background:var(--surf2);border:1px solid var(--bdr);padding:.45rem .6rem;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);text-align:center;white-space:nowrap}
+.dr-grid th.row-lbl{text-align:left;min-width:120px}
+.dr-grid td{border:1px solid var(--bdr);padding:.3rem .4rem;vertical-align:top;min-width:90px}
+.dr-grid tr.section-hdr td,.dr-grid tr.section-hdr th{background:var(--surf3);font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--tx3);padding:.3rem .6rem}
+.dr-cell{display:flex;flex-wrap:wrap;gap:2px;min-height:28px;cursor:pointer;border-radius:5px;padding:2px;transition:background .1s}
+.dr-cell:hover{background:var(--surf3)}
+.dr-chip{display:inline-flex;align-items:center;gap:3px;font-size:.72rem;font-weight:600;padding:.15rem .4rem;border-radius:4px;background:var(--surf3);border:1px solid var(--bdr2);color:var(--tx2)}
+.dr-chip.appt{background:var(--acc-d);border-color:#2a4a8e;color:#8ab4f8}
+.dr-chip.surg{background:var(--pur-d);border-color:#3d2a6e;color:var(--pur)}
+.dr-chip.dent{background:var(--grn-d);border-color:#1a5c40;color:var(--grn)}
+.dr-chip.spec{background:var(--teal-d);border-color:#0d4a44;color:var(--teal)}
+.dr-chip-x{background:none;border:none;color:inherit;cursor:pointer;opacity:.5;font-size:.7rem;padding:0;line-height:1}
+.dr-chip-x:hover{opacity:1}
+.dr-add{font-size:.65rem;color:var(--tx3);cursor:pointer;padding:.1rem .3rem;border-radius:3px;border:1px dashed transparent}
+.dr-add:hover{border-color:var(--bdr2);color:var(--tx2)}
+
+/* DOC PICKER */
+#doc-picker{position:fixed;z-index:500;background:var(--surf2);border:1px solid var(--bdr2);border-radius:10px;min-width:200px;box-shadow:0 8px 32px rgba(0,0,0,.6);display:none;overflow:hidden}
+.doc-pk-row{display:flex;align-items:center;gap:.55rem;padding:.42rem .85rem;cursor:pointer;font-size:.82rem;transition:background .1s}
+.doc-pk-row:hover{background:var(--surf3)}
+
+/* WEEK CALENDAR / ASSIGNMENT */
+.week-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:.5rem;margin-bottom:1.25rem}
+.wc-cell{background:var(--surf2);border:1px solid var(--bdr);border-radius:8px;padding:.6rem .7rem;min-height:70px;cursor:pointer;transition:all .12s}
+.wc-cell:hover{border-color:var(--bdr2)}
+.wc-cell.wc-sel{border-color:var(--acc);background:var(--acc-d)}
+.wc-date{font-size:.7rem;color:var(--tx3);margin-bottom:.3rem}
+.wc-wk{font-size:.78rem;font-weight:700}
+.wc-wk-badge{font-size:.65rem;font-weight:700;padding:.1rem .35rem;border-radius:3px;margin-top:.2rem;display:inline-block}
+
+/* DEMAND TABLE */
+.demand-tbl-wrap{overflow-x:auto}
+/* Demand page nav bar */
+.dem-nav{display:flex;align-items:center;gap:.75rem;padding:.75rem 1.25rem;background:var(--surf2);border:1px solid var(--bdr);border-radius:12px;margin-bottom:1rem}
+.dem-nav-arrow{background:none;border:1px solid var(--bdr2);border-radius:7px;color:var(--tx2);font-size:1.2rem;width:32px;height:32px;cursor:pointer;transition:all .12s;flex-shrink:0}
+.dem-nav-arrow:hover{border-color:var(--acc);color:var(--acc)}
+.dem-nav-center{flex:1;text-align:center}
+.dem-nav-dates{font-size:.95rem;font-weight:700;color:var(--tx)}
+.dem-nav-sub{font-size:.72rem;color:var(--tx3);margin-top:.15rem}
+.dem-nav-actions{display:flex;gap:.4rem;flex-shrink:0}
+/* Doctor override grid */
+.dem-override-card{margin-bottom:1rem}
+.doc-ov-grid{display:grid;gap:.35rem}
+.doc-ov-row{display:grid;align-items:center;gap:.3rem}
+.doc-ov-name{font-size:.75rem;font-weight:600;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:80px}
+.doc-ov-cell{padding:.25rem .4rem;border-radius:5px;font-size:.72rem;font-weight:700;text-align:center;cursor:pointer;border:1px solid transparent;transition:all .12s;user-select:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.doc-ov-cell.present{background:var(--acc-d);color:var(--acc);border-color:rgba(79,142,247,.3)}
+.doc-ov-cell.absent{background:var(--red-d);color:var(--red);border-color:rgba(239,68,68,.3);text-decoration:line-through;opacity:.7}
+.doc-ov-cell.not-scheduled{background:var(--surf3);color:var(--tx3);cursor:default}
+/* Load template modal */
+.tpl-week-btn{padding:.6rem .5rem;border-radius:8px;border:2px solid var(--bdr2);background:var(--surf3);color:var(--tx2);font-size:.82rem;font-weight:700;cursor:pointer;text-align:center;transition:all .12s}
+.tpl-week-btn:hover{border-color:var(--acc);color:var(--acc)}
+.tpl-week-btn.tpl-sel{border-color:var(--acc);background:var(--acc-d);color:var(--acc)}
+.tpl-week-btn .tpl-desc{font-size:.62rem;font-weight:400;color:var(--tx3);margin-top:.2rem;display:block}
+.tpl-src-opt{display:flex;align-items:center;gap:.55rem;padding:.45rem .65rem;border-radius:7px;border:1.5px solid var(--bdr2);cursor:pointer;font-size:.8rem;transition:all .12s}
+.tpl-src-opt:hover{border-color:var(--acc)}
+.tpl-src-opt.tso-sel{border-color:var(--acc);background:var(--acc-d);color:var(--acc)}
+.tpl-src-opt input[type=radio]{accent-color:var(--acc)}
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;align-items:center;justify-content:center}
+.demand-tbl{border-collapse:collapse;min-width:750px;width:100%}
+.demand-tbl th{background:var(--surf2);border:1px solid var(--bdr);padding:.45rem .7rem;font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3);text-align:center}
+.demand-tbl th.area-col{text-align:left}
+.demand-tbl td{border:1px solid var(--bdr);padding:.45rem .7rem;font-size:.82rem;vertical-align:middle;text-align:center}
+.demand-tbl td.area-col{text-align:left;font-weight:700}
+.unit-cell{font-size:.88rem;font-weight:700}
+.unit-zero{color:var(--tx3)}
+.unit-pos{color:var(--tx)}
+
+#toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);padding:.55rem 1.2rem;border-radius:8px;font-size:.82rem;font-weight:600;z-index:9999;display:none;pointer-events:none;white-space:nowrap}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🐾 Vet<span>Schedule</span></div>
+  <nav>
+    <button class="nav-btn active" onclick="showPage('schedule',this)">Schedule</button>
+    <button class="nav-btn" onclick="showPage('roster',this)">Roster</button>
+    <button class="nav-btn" onclick="showPage('demand',this)">Demand</button>
+    <button class="nav-btn" onclick="showPage('settings',this)">Settings</button>
+  </nav>
+  <div style="display:flex;align-items:center;gap:.5rem">
+    <button class="btn btn-ghost btn-sm" onclick="navWeek(-1)">‹</button>
+    <span class="week-pill" id="week-label" onclick="showPage('settings',document.querySelector('.nav-btn:nth-child(4)'));switchSPanel('week-assign')">Mar 1–7, 2026</span>
+    <button class="btn btn-ghost btn-sm" onclick="navWeek(1)">›</button>
+  </div>
+</header>
+
+<!-- SCHEDULE PAGE -->
+<div class="page active" id="page-schedule">
+  <div class="ph">
+    <div><div class="ph-title">Tech Schedule</div><div class="ph-sub" id="sched-sub">Select a day</div></div>
+    <div style="display:flex;gap:.5rem">
+      <button class="btn btn-grn" onclick="autoFill()">⚡ Auto-Fill Day</button>
+      <button class="btn btn-ghost" onclick="clearDay()">✕ Clear Day</button>
+    </div>
+  </div>
+  <div class="stats-row" id="week-stats"></div>
+  <div class="sched-grid">
+    <div>
+      <div style="font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--tx3);margin-bottom:.5rem">Week</div>
+      <div class="day-list" id="day-list"></div>
+    </div>
+    <div id="day-detail" style="color:var(--tx3);text-align:center;padding:3rem">← Select a day</div>
+  </div>
+</div>
+
+<!-- ROSTER PAGE -->
+<div class="page" id="page-roster">
+  <div class="ph">
+    <div><div class="ph-title">Staff Roster</div><div class="ph-sub">Click any card to open profile</div></div>
+    <div style="display:flex;gap:.35rem;flex-wrap:wrap;align-items:center" id="pool-filter-bar">
+      <!-- populated by renderRoster -->
+    </div>
+  </div>
+  <div class="roster-grid" id="roster-grid"></div>
+</div>
+
+<!-- DEMAND PAGE -->
+<div class="page" id="page-demand">
+  <!-- Week nav bar -->
+  <div class="dem-nav">
+    <button class="dem-nav-arrow" onclick="shiftDemandWeek(-1)">‹</button>
+    <div class="dem-nav-center">
+      <div class="dem-nav-dates" id="dem-nav-dates"></div>
+      <div class="dem-nav-sub" id="dem-nav-sub"></div>
+    </div>
+    <button class="dem-nav-arrow" onclick="shiftDemandWeek(1)">›</button>
+    <div class="dem-nav-actions">
+      <button class="btn btn-ghost btn-sm" onclick="openLoadTemplate()">📋 Load Template</button>
+    </div>
+  </div>
+
+  <!-- Doctor override panel -->
+  <div class="card dem-override-card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+      <div>
+        <div class="slbl" style="margin-bottom:0">Doctor Schedule This Week</div>
+        <div style="font-size:.72rem;color:var(--tx3);margin-top:.2rem">Click any doctor to mark out for that day — units update automatically</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="clearAllOverrides()">✕ Clear overrides</button>
+    </div>
+    <div id="dem-doc-grid"></div>
+  </div>
+
+  <!-- Unit demand table -->
+  <div class="card demand-tbl-wrap">
+    <div class="slbl">Staffing Units Required</div>
+    <div style="overflow-x:auto"><table class="demand-tbl" id="demand-units-tbl"></table></div>
+  </div>
+</div>
+
+<!-- Load template modal -->
+<div id="load-tpl-backdrop" class="modal-backdrop" id="load-tpl-backdrop">
+  <div id="load-tpl-modal" style="background:var(--surf2);border:1px solid var(--bdr2);border-radius:14px;padding:1.5rem;min-width:320px;max-width:440px">
+    <div style="font-family:'Libre Baskerville',serif;font-size:1.05rem;margin-bottom:.35rem">Load Rotation Template</div>
+    <div style="font-size:.78rem;color:var(--tx3);margin-bottom:1.1rem">Choose which week template to apply to <span id="tpl-target-week" style="color:var(--acc);font-weight:600"></span>. Existing doctor overrides for this week will be cleared.</div>
+    <div id="tpl-week-btns" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;margin-bottom:1.1rem"></div>
+    <div style="display:flex;gap:.5rem;justify-content:flex-end">
+      <button class="btn btn-ghost btn-sm" onclick="closeLoadTemplate()">Cancel</button>
+      <button class="btn btn-pri btn-sm" id="tpl-apply-btn" onclick="applyTemplate()" disabled>Apply</button>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS PAGE -->
+<div class="page" id="page-settings">
+  <div class="ph"><div><div class="ph-title">Settings</div><div class="ph-sub">Area rules, doctor schedule, week assignments</div></div></div>
+  <div class="settings-layout">
+    <div class="settings-nav">
+      <div class="snav-sep">Doctor Schedule</div>
+      <button class="snav-item" data-sp="doc-schedule" onclick="switchSPanel('doc-schedule',this)">📋 Week Templates</button>
+      <button class="snav-item" data-sp="week-assign" onclick="switchSPanel('week-assign',this)">📅 Week Assignments</button>
+      <div class="snav-sep">Rules</div>
+      <button class="snav-item active" data-sp="area-rules" onclick="switchSPanel('area-rules',this)">⚙️ Area Rules</button>
+    </div>
+    <div>
+      <!-- AREA RULES -->
+      <div class="spanel active" id="spanel-area-rules">
+        <div class="card">
+          <div class="slbl">Area Demand Rules</div>
+          <p style="font-size:.78rem;color:var(--tx3);margin-bottom:1rem">These rules compute required tech units from doctor counts. Edit multipliers, rounding, and shift coverage per area.</p>
+          <div style="overflow-x:auto"><table class="area-rules-tbl" id="area-rules-tbl"></table></div>
+        </div>
+      </div>
+      <!-- DOCTOR SCHEDULE TEMPLATES -->
+      <div class="spanel" id="spanel-doc-schedule">
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem;flex-wrap:wrap;gap:.5rem">
+            <div>
+              <div class="slbl" style="margin-bottom:0">Doctor Schedule Templates</div>
+              <div style="font-size:.72rem;color:var(--tx3);margin-top:.2rem">Click any cell to add or remove doctors. Changes reflect immediately in Demand.</div>
+            </div>
+            <button class="btn btn-pri btn-sm" onclick="openCreateTemplate()">＋ Create Template</button>
+          </div>
+          <!-- Template selector -->
+          <div style="display:flex;align-items:center;gap:.65rem;margin-bottom:1rem;padding:.6rem .75rem;background:var(--surf3);border-radius:9px;border:1px solid var(--bdr)">
+            <label style="font-size:.75rem;color:var(--tx3);white-space:nowrap">Editing:</label>
+            <select id="tpl-select" onchange="selDrWeek=this.value;renderDrSchedule()" style="flex:1;padding:.3rem .5rem;font-size:.82rem;font-weight:600;background:var(--surf2);border:1px solid var(--bdr2);border-radius:6px;color:var(--tx)"></select>
+            <button class="btn btn-ghost btn-sm" onclick="renameTpl()" title="Rename">✎</button>
+            <button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="deleteTpl()" title="Delete">✕</button>
+          </div>
+          <div class="dr-grid-wrap"><table class="dr-grid" id="dr-schedule-grid"></table></div>
+        </div>
+      </div>
+      <!-- WEEK ASSIGNMENTS -->
+      <div class="spanel" id="spanel-week-assign">
+        <div class="card">
+          <div class="slbl">Assign Week Templates to Calendar Weeks</div>
+          <p style="font-size:.78rem;color:var(--tx3);margin-bottom:1rem">Assign which of the 6 rotating templates applies to each calendar week. Vacation overrides can be added per doctor per date.</p>
+          <div id="week-assign-content"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CREATE TEMPLATE MODAL -->
+<div id="create-tpl-backdrop" class="modal-backdrop" id="create-tpl-backdrop">
+  <div style="background:var(--surf2);border:1px solid var(--bdr2);border-radius:14px;padding:1.5rem;min-width:340px;max-width:460px">
+    <div style="font-family:'Libre Baskerville',serif;font-size:1.05rem;margin-bottom:1rem">Create Template</div>
+    <div style="margin-bottom:.75rem">
+      <label style="font-size:.75rem;color:var(--tx3);display:block;margin-bottom:.3rem">Template name</label>
+      <input id="new-tpl-name" class="di" placeholder="e.g. Holiday Week, Summer Schedule…" style="width:100%">
+    </div>
+    <div style="margin-bottom:1.1rem">
+      <label style="font-size:.75rem;color:var(--tx3);display:block;margin-bottom:.3rem">Start from</label>
+      <div style="display:flex;flex-direction:column;gap:.4rem" id="new-tpl-source-opts"></div>
+    </div>
+    <div style="display:flex;gap:.5rem;justify-content:flex-end">
+      <button class="btn btn-ghost btn-sm" onclick="closeCreateTemplate()">Cancel</button>
+      <button class="btn btn-pri btn-sm" onclick="confirmCreateTemplate()">Save Template</button>
+    </div>
+  </div>
+</div>
+
+<!-- PICKERS -->
+<div id="picker-drop"></div>
+<div id="doc-picker"></div>
+<div id="cal-pop"></div>
+<div id="drawer-backdrop" onclick="closeDrawer()"></div>
+
+<!-- PROFILE DRAWER -->
+<div id="profile-drawer">
+  <div class="dwr-hdr">
+    <div class="dwr-hdr-top">
+      <div><div class="dwr-name" id="d-name"></div><div class="dwr-id" id="d-id"></div></div>
+      <button class="dwr-close" onclick="closeDrawer()">✕</button>
+    </div>
+    <div class="dwr-badges" id="d-badges"></div>
+  </div>
+  <div class="dwr-tabs">
+    <button class="dtab active" data-tab="overview" onclick="switchDTab(this)">Overview <span class="dirty-pip" id="pip-overview"></span></button>
+    <button class="dtab" data-tab="skills" onclick="switchDTab(this)">Skills <span class="dirty-pip" id="pip-skills"></span></button>
+    <button class="dtab" data-tab="avail" onclick="switchDTab(this)">Availability <span class="dirty-pip" id="pip-avail"></span></button>
+    <button class="dtab" data-tab="prefs" onclick="switchDTab(this)">Preferences <span class="dirty-pip" id="pip-prefs"></span></button>
+    <button class="dtab" data-tab="rules" onclick="switchDTab(this)">Rules <span class="dirty-pip" id="pip-rules"></span></button>
+  </div>
+  <div class="dwr-body">
+    <div class="dpanel active" id="dpanel-overview"></div>
+    <div class="dpanel" id="dpanel-skills"></div>
+    <div class="dpanel" id="dpanel-avail"></div>
+    <div class="dpanel" id="dpanel-prefs"></div>
+    <div class="dpanel" id="dpanel-rules"></div>
+  </div>
+  <div class="dwr-foot">
+    <div class="unsaved-note" id="unsaved-note"><div class="unsaved-dot"></div>Unsaved changes</div>
+    <div style="display:flex;gap:.5rem">
+      <button class="btn btn-ghost" onclick="discardDraft()">Discard</button>
+      <button class="btn btn-pri" onclick="saveDraft()">💾 Save &amp; Close</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════════════════
+const AREA_COL = {
+  // LVT areas
+  RUNWAY:'#4f8ef7',SURGERY:'#a78bfa',DENTAL:'#34d399',SPECPROCEDURE:'#2dd4bf',
+  PROCEDURES:'#fbbf24',LAB:'#60a5fa',TRX:'#f472b6',CIRCULATION:'#fb923c',
+  REHAB:'#86efac',HOUSECALLS:'#f97316',
+  'SAT APPT':'#e879f9','SAT FLOAT':'#c084fc','SUN APPT':'#f9a8d4','SUN FLOAT':'#fda4af',
+  // PSR areas
+  PSR_FRONT:'#38bdf8',PSR_PHONE:'#0ea5e9',
+  // PCR / Pharm
+  PCR:'#a3e635',PHARM:'#fb7185',
+};
+
+// Pool definitions — single source of truth for pool metadata
+const POOLS = [
+  {
+    id:'LVT', label:'Techs (LVT)', color:'#4f8ef7', active:true,
+    areas:['RUNWAY','SURGERY','DENTAL','SPECPROCEDURE','PROCEDURES','LAB','TRX','CIRCULATION','REHAB','HOUSECALLS','SAT APPT','SUN APPT'],
+    note:'Licensed Veterinary Technicians'
+  },
+  {
+    id:'ASST', label:'Assistants', color:'#fb923c', active:true,
+    areas:['RUNWAY','SURGERY','PROCEDURES','LAB','TRX','CIRCULATION','REHAB','HOUSECALLS','SAT APPT','SUN APPT','SAT FLOAT'],
+    note:'Veterinary Assistants — area-level clearance via tags'
+  },
+  {
+    id:'PSR', label:'PSR', color:'#38bdf8', active:true,
+    areas:['PSR_FRONT','PSR_PHONE'],
+    note:'Patient Service Representatives — Front desk and Phone Room',
+    weekendDays:[]  // PSR does not work weekends (editable)
+  },
+  {
+    id:'PCR', label:'PCR', color:'#a3e635', active:true,
+    areas:['PCR'],
+    note:'Patient Care Representatives — rules TBD',
+    weekendDays:[]
+  },
+  {
+    id:'PHARM', label:'Pharm', color:'#fb7185', active:true,
+    areas:['PHARM'],
+    note:'Pharmacy staff — rules TBD',
+    weekendDays:[]
+  },
+];
+
+const POOL_IDS = POOLS.map(p=>p.id);
+const DAYS_FULL = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const DAYS_SHORT = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const SKILL_LEVELS = ['SOLO','MENTOR','INDIRECT','DIRECT','NONE'];
+const SKILL_RANK = {SOLO:4,MENTOR:3,INDIRECT:2,DIRECT:1,NONE:0};
+const SHIFT_TIMES = {RUNWAY_AM:'7:15–15:00',RUNWAY_PM:'14:00–21:00',SURGERY_AM:'7:15–16:00',DENTAL_AM:'7:15–15:00',SPECPROCEDURE_AM:'7:15–15:00',PROCEDURES_AM:'7:15–15:00',LAB_AM:'7:15–14:00',LAB_PM:'12:00–21:00',TRX_PM:'12:00–21:00',CIRCULATION_AM:'7:15–15:00',CIRCULATION_PM:'14:00–21:00',REHAB_AM:'7:15–15:00',REHAB_PM:'14:00–21:00',HOUSECALLS_AM:'Varies',"SAT APPT_AM":'7:15–13:00',"SAT APPT_PM":'13:00–17:30',"SUN APPT_AM":'7:15–13:00'};
+const RULE_TYPES = {max:{l:'Max Shifts/Area',c:'rt-max'},pair:{l:'DVM Pairing',c:'rt-pair'},require:{l:'Require Mentor',c:'rt-require'},restrict:{l:'Restrict Area',c:'rt-restrict'},note:{l:'Note',c:'rt-note'}};
+
+// Doctor list
+const DOCTORS = [
+  {id:'D7', init:'C'}, {id:'D19',init:'SG'},{id:'D5', init:'AD'},{id:'D18',init:'BP'},
+  {id:'D38',init:'TR'},{id:'D15',init:'HG'},{id:'D24',init:'RF'},{id:'D16',init:'CH'},
+  {id:'D17',init:'BK'},{id:'D20',init:'MF'},{id:'D22',init:'MD'},{id:'D40',init:'ELF'},
+];
+
+// Service rows in the doctor schedule grid
+const DR_SERVICES = [
+  {key:'SURGERY',      label:'Surgery',       cls:'surg'},
+  {key:'DENTAL',       label:'Dentist',       cls:'dent'},
+  {key:'SPECPROCEDURE',label:'Special Proc.', cls:'spec'},
+  {key:'HOUSECALLS',   label:'House Calls',   cls:'hc'  },
+  {key:'APPT_AM',      label:'AM Appts',      cls:'appt'},
+  {key:'APPT_AFT',     label:'AFT Appts',     cls:'appt'},
+  {key:'APPT_EVE',     label:'Evening Appts', cls:'appt'},
+];
+
+// ═══════════════════════════════════════════════════════
+// AREA DEMAND RULES (from Unit_Calculation_Ref.csv)
+// ═══════════════════════════════════════════════════════
+// role: 'tech' | 'asst' | 'tech_or_asst'  (omitted = tech)
+const AREA_RULES = [
+  // ── RUNWAY — tech + asst, all 7 days ────────────────────────────────────
+  {area:'RUNWAY',       shift:'AM',  type:'PER_DOC', source:'appt_am',     mult:0.5, round:'CEIL', active:true,  days:[0,1,2,3,4,5,6], role:'tech',         note:'ceil(appt AM docs × 0.5) — tech'},
+  {area:'RUNWAY',       shift:'AM',  type:'PER_DOC', source:'appt_am',     mult:0.5, round:'CEIL', active:true,  days:[0,1,2,3,4,5,6], role:'asst',         note:'ceil(appt AM docs × 0.5) — asst'},
+  {area:'RUNWAY',       shift:'PM',  type:'PER_DOC', source:'appt_pm',     mult:0.5, round:'CEIL', active:true,  days:[0,1,2,3,4,5,6], role:'tech',         note:'ceil(max(AFT,EVE) × 0.5) — tech'},
+  {area:'RUNWAY',       shift:'PM',  type:'PER_DOC', source:'appt_pm',     mult:0.5, round:'CEIL', active:true,  days:[0,1,2,3,4,5,6], role:'asst',         note:'ceil(max(AFT,EVE) × 0.5) — asst'},
+  // ── SURGERY — 1 tech + 1 asst per doc ───────────────────────────────────
+  {area:'SURGERY',      shift:'AM',  type:'PER_DOC', source:'surgery',     mult:1.0, round:'NONE', active:true,  days:[0,1,2,3,4,5,6], role:'tech',         note:'1 tech per surgery doc'},
+  {area:'SURGERY',      shift:'AM',  type:'PER_DOC', source:'surgery',     mult:1.0, round:'NONE', active:true,  days:[0,1,2,3,4,5,6], role:'asst',         note:'1 asst per surgery doc'},
+  // ── DENTAL / SPECPROCEDURE — tech only ──────────────────────────────────
+  {area:'DENTAL',       shift:'AM',  type:'PER_DOC', source:'dental',      mult:1.0, round:'NONE', active:true,  days:[0,1,2,3,4,5,6], role:'tech',         note:'1 tech per dental doc'},
+  {area:'SPECPROCEDURE',shift:'AM',  type:'PER_DOC', source:'specproc',    mult:1.0, round:'NONE', active:true,  days:[0,1,2,3,4,5,6], role:'tech',         note:'1 tech per special procedures doc'},
+  // ── FIXED / TOGGLE AREAS ────────────────────────────────────────────────
+  {area:'PROCEDURES',   shift:'AM',  type:'FIXED',   source:null,          mult:1.0, round:'NONE', active:true,  days:[1,2,3,4,5],     role:'tech_or_asst', _sectionBreak:'Fixed / Toggle Areas', note:'Fixed 1 slot AM — tech or asst'},
+  {area:'LAB',          shift:'AM',  type:'FIXED',   source:null,          mult:1.0, round:'NONE', active:true,  days:[1,2,3,4,5],     role:'tech_or_asst', note:'Fixed 1 slot AM — tech or asst'},
+  {area:'LAB',          shift:'PM',  type:'FIXED',   source:null,          mult:1.0, round:'NONE', active:true,  days:[1,2,3,4,5],     role:'tech_or_asst', note:'Fixed 1 slot PM — tech or asst'},
+  {area:'TRX',          shift:'PM',  type:'FIXED',   source:null,          mult:1.0, round:'NONE', active:true,  days:[1,2,3,4,5],     role:'tech_or_asst', note:'Fixed 1 slot PM — tech or asst'},
+  {area:'CIRCULATION',  shift:'AM',  type:'FIXED',   source:null,          mult:1.0, round:'NONE', active:false, days:[1,2,3,4,5],     role:'tech_or_asst', note:'Toggle per day — tech or asst'},
+  {area:'CIRCULATION',  shift:'PM',  type:'FIXED',   source:null,          mult:1.0, round:'NONE', active:false, days:[1,2,3,4,5],     role:'tech_or_asst', note:'Toggle per day — tech or asst'},
+  {area:'REHAB',        shift:'AM',  type:'FIXED',   source:null,          mult:1.0, round:'NONE', active:false, days:[1,2,3,4,5],     role:'tech_or_asst', note:'Toggle per day — tech or asst'},
+  {area:'HOUSECALLS',   shift:'AM',  type:'PER_DOC', source:'housecalls',  mult:1.0, round:'NONE', active:true,  days:[0,1,2,3,4,5,6], role:'asst',         note:'1 asst (special clearance) per house call doc'},
+  // ── SATURDAY — tech or asst ──────────────────────────────────────────────
+  {area:'SAT APPT',     shift:'AM',  type:'PER_DOC', source:'appt_am',     mult:0.5, round:'CEIL', active:true,  days:[6],             role:'tech_or_asst', note:'ceil(sat AM appt docs × 0.5) — tech or asst'},
+  {area:'SAT APPT',     shift:'PM',  type:'PER_DOC', source:'appt_aft',    mult:0.5, round:'CEIL', active:true,  days:[6],             role:'tech_or_asst', note:'ceil(sat AFT appt docs × 0.5) — tech or asst'},
+  {area:'SAT FLOAT',    shift:'AM',  type:'FIXED',   source:null,          mult:0.0, round:'NONE', active:false, days:[6],             role:'tech_or_asst', note:'Saturday float — off by default, tech or asst'},
+  // ── SUNDAY — tech or asst, runway now included via days:[0,...] above ───
+  {area:'SUN APPT',     shift:'AM',  type:'PER_DOC', source:'appt_am',     mult:0.5, round:'CEIL', active:true,  days:[0],             role:'tech_or_asst', note:'ceil(sun AM appt docs × 0.5) — tech or asst'},
+  {area:'SUN FLOAT',    shift:'AM',  type:'FIXED',   source:null,          mult:0.0, round:'NONE', active:false, days:[0],             role:'tech_or_asst', note:'Sunday float — off by default, tech or asst'},
+  // ── PSR pool areas ──────────────────────────────────────────────────────
+  {area:'PSR_FRONT', shift:'AM', pool:'PSR', type:'FIXED', source:null, mult:2.0, round:'NONE', active:true,  days:[1,2,3,4,5], _sectionBreak:'PSR — Front Desk & Phone Room', note:'2 PSR Front slots AM weekdays — rules TBD'},
+  {area:'PSR_FRONT', shift:'PM', pool:'PSR', type:'FIXED', source:null, mult:1.0, round:'NONE', active:true,  days:[1,2,3,4,5], note:'1 PSR Front slot PM weekdays — rules TBD'},
+  {area:'PSR_PHONE', shift:'AM', pool:'PSR', type:'FIXED', source:null, mult:1.0, round:'NONE', active:true,  days:[1,2,3,4,5], note:'1 PSR Phone Room slot AM — rules TBD'},
+  {area:'PSR_PHONE', shift:'PM', pool:'PSR', type:'FIXED', source:null, mult:1.0, round:'NONE', active:false, days:[1,2,3,4,5], note:'Phone room PM — off by default, TBD'},
+  // ── PCR pool areas ──────────────────────────────────────────────────────
+  {area:'PCR', shift:'AM', pool:'PCR', type:'FIXED', source:null, mult:1.0, round:'NONE', active:true,  days:[1,2,3,4,5], _sectionBreak:'PCR', note:'PCR staffing — rules TBD'},
+  {area:'PCR', shift:'PM', pool:'PCR', type:'FIXED', source:null, mult:1.0, round:'NONE', active:false, days:[1,2,3,4,5], note:'PCR PM — rules TBD'},
+  // ── Pharm pool areas ────────────────────────────────────────────────────
+  {area:'PHARM', shift:'AM', pool:'PHARM', type:'FIXED', source:null, mult:1.0, round:'NONE', active:true,  days:[1,2,3,4,5], _sectionBreak:'Pharm', note:'Pharmacy staffing — rules TBD'},
+  {area:'PHARM', shift:'PM', pool:'PHARM', type:'FIXED', source:null, mult:1.0, round:'NONE', active:false, days:[1,2,3,4,5], note:'Pharm PM — rules TBD'},
+];
+
+// Day-level overrides: {date → {area_shift → active true/false}}
+// e.g. CIRCULATION PM was manually enabled on 3/2/2026
+const DAY_OVERRIDES = {
+  '3/2/2026': {'CIRCULATION_PM': true},
+};
+
+// ═══════════════════════════════════════════════════════
+// 6-WEEK ROTATING DOCTOR SCHEDULE TEMPLATES
+// Each template: {SURGERY:[],DENTAL:[],SPECPROCEDURE:[],HOUSECALLS:[],APPT_AM:[],APPT_AFT:[],APPT_EVE:[]}
+// Indexed by day 0=Sun..6=Sat
+// ═══════════════════════════════════════════════════════
+function makeEmptyTemplate(){
+  const t = {};
+  DAYS_FULL.forEach((_,i) => {
+    t[i] = {
+      SURGERY:[],DENTAL:[],SPECPROCEDURE:[],HOUSECALLS:[],
+      APPT_AM:[],APPT_AFT:[],APPT_EVE:[]
+    };
+  });
+  return t;
+}
+
+// Pre-populate Week 1 from Doctor_Shifts CSV data
+// Mon-Fri same pattern; Sat surgery/dental/spec + appts; Sun appts only
+function buildWeek1(){
+  const t = makeEmptyTemplate();
+  // Mon–Fri (days 1–5): Surgery BP+BK, Dental RF, SpecProc AD, AM appts: AD C MD TR HG, AFT: AD MD CH, Eve: BK BP SG AD
+  [1,2,3,4,5].forEach(d => {
+    t[d].SURGERY       = ['BP','BK'];
+    t[d].DENTAL        = ['RF'];
+    t[d].SPECPROCEDURE = ['AD'];
+    t[d].APPT_AM       = ['MF','SG','AD','HG','BP','C'];
+    t[d].APPT_AFT      = ['MD','SG','AD','BK'];
+    t[d].APPT_EVE      = ['MD','C','SG','RF'];
+  });
+  // Saturday (day 6)
+  t[6].SURGERY       = ['BP','BK'];
+  t[6].DENTAL        = ['RF'];
+  t[6].SPECPROCEDURE = ['AD'];
+  t[6].APPT_AM       = ['MF','SG','MD'];
+  t[6].APPT_AFT      = ['AD','BP'];
+  // Sunday (day 0)
+  t[0].SURGERY       = ['BP','BK'];
+  t[0].DENTAL        = ['RF'];
+  t[0].SPECPROCEDURE = ['AD'];
+  t[0].APPT_AM       = ['SG','AD','MD','TR','HG'];
+  return t;
+}
+
+// Week templates 1-6; start with week 1 populated, rest empty
+// Named templates — each has an id, name, and 7-day schedule object
+// id is a stable string key used everywhere templates are referenced
+const TEMPLATES = [
+  {id:'t1', name:'Week 1 Standard', days: buildWeek1()},
+  {id:'t2', name:'Week 2 Standard', days: makeEmptyTemplate()},
+  {id:'t3', name:'Week 3 Standard', days: makeEmptyTemplate()},
+  {id:'t4', name:'Week 4 Standard', days: makeEmptyTemplate()},
+  {id:'t5', name:'Week 5 Standard', days: makeEmptyTemplate()},
+  {id:'t6', name:'Week 6 Standard', days: makeEmptyTemplate()},
+];
+
+// Calendar weeks → template id
+// Key: first date of week (Sunday) as 'M/D/YYYY', value: template id string
+const WEEK_MAP = {
+  '3/1/2026': 't1',
+  '3/8/2026': 't2',
+};
+
+// Helper: get template by id
+const getTpl   = id => TEMPLATES.find(t=>t.id===id);
+const getTplDays = id => (getTpl(id)||TEMPLATES[0]).days;
+
+// Doctor vacation overrides: {docInit: [date, date, ...]}
+const DOC_VACATIONS = {};
+
+// ═══════════════════════════════════════════════════════
+// DATABASE
+// ═══════════════════════════════════════════════════════
+const DB = {
+  emps: [
+    // ── LVT pool ──────────────────────────────────────────────────────────
+    {id:'T1', pool:'LVT', name:'Ahl, Brook',         active:true, ft:true,  maxH:39,  minH:30, maxD:null,dbl:false},
+    {id:'T2', pool:'LVT', name:'Anziano, Isabella',   active:true, ft:true,  maxH:39,  minH:30, maxD:null,dbl:true },
+    {id:'T3', pool:'LVT', name:'Benson, Natalie',     active:true, ft:true,  maxH:39,  minH:30, maxD:null,dbl:true },
+    {id:'T4', pool:'LVT', name:'Corey, Sarah',        active:true, ft:true,  maxH:39,  minH:30, maxD:null,dbl:false},
+    {id:'T5', pool:'LVT', name:'Foti, Rachel',        active:false,ft:false, maxH:null,minH:null,maxD:null,dbl:false},
+    {id:'T6', pool:'LVT', name:'Friedman, Charliann', active:true, ft:false, maxH:null,minH:null,maxD:null,dbl:false},
+    {id:'T7', pool:'LVT', name:'Grippo, Brittany',    active:true, ft:true,  maxH:39,  minH:30, maxD:null,dbl:true },
+    {id:'T8', pool:'LVT', name:'Hitchcock, Joann',    active:true, ft:true,  maxH:39,  minH:30, maxD:null,dbl:false},
+    {id:'T9', pool:'LVT', name:'LaTorre, Jillian',    active:true, ft:true,  maxH:39,  minH:30, maxD:null,dbl:false},
+    {id:'T10',pool:'LVT', name:'Laurenty, Kaitlyn',   active:true, ft:true,  maxH:39,  minH:30, maxD:null,dbl:true },
+    {id:'T11',pool:'LVT', name:'Mantica, Carlie',     active:true, ft:true,  maxH:39,  minH:30, maxD:null,dbl:false},
+    {id:'T12',pool:'LVT', name:'Rousseas, Kelly',     active:true, ft:false, maxH:null,minH:null,maxD:null,dbl:true },
+    {id:'T13',pool:'LVT', name:'Szafran, Shannon',    active:true, ft:true,  maxH:32,  minH:30, maxD:3,   dbl:true },
+    {id:'T14',pool:'LVT', name:'Zeman, Mary',         active:true, ft:true,  maxH:39,  minH:30, maxD:null,dbl:true },
+    {id:'T15',pool:'LVT', name:'Passamore, Kyle',     active:true, ft:true,  maxH:39,  minH:30, maxD:null,dbl:false},
+    // ── ASST pool ─────────────────────────────────────────────────────────
+    // (Placeholder — add real assistants here)
+    {id:'A1', pool:'ASST', name:'Assistant, Sample',  active:false,ft:false, maxH:null,minH:null,maxD:null,dbl:false},
+    // ── PSR pool ──────────────────────────────────────────────────────────
+    // (Placeholder — add real PSR staff here)
+    {id:'P1', pool:'PSR',  name:'PSR, Sample',        active:false,ft:false, maxH:null,minH:null,maxD:null,dbl:false},
+    // ── PCR pool ──────────────────────────────────────────────────────────
+    {id:'C1', pool:'PCR',  name:'PCR, Sample',        active:false,ft:false, maxH:null,minH:null,maxD:null,dbl:false},
+    // ── PHARM pool ────────────────────────────────────────────────────────
+    {id:'PH1',pool:'PHARM',name:'Pharm, Sample',      active:false,ft:false, maxH:null,minH:null,maxD:null,dbl:false},
+  ],
+  skills: {
+    T1:{RUNWAY:'INDIRECT',SURGERY:'INDIRECT',DENTAL:'DIRECT',SPECPROCEDURE:'INDIRECT',PROCEDURES:'DIRECT',TRX:'INDIRECT',LAB:'INDIRECT',CIRCULATION:'INDIRECT',REHAB:'INDIRECT'},
+    T2:{RUNWAY:'MENTOR',SURGERY:'MENTOR',DENTAL:'MENTOR',SPECPROCEDURE:'MENTOR',PROCEDURES:'MENTOR',TRX:'MENTOR',LAB:'MENTOR',CIRCULATION:'MENTOR',REHAB:'MENTOR'},
+    T3:{RUNWAY:'SOLO',SURGERY:'SOLO',DENTAL:'SOLO',SPECPROCEDURE:'SOLO',PROCEDURES:'SOLO',TRX:'SOLO',LAB:'SOLO',CIRCULATION:'SOLO',REHAB:'SOLO'},
+    T4:{RUNWAY:null,SURGERY:'SOLO',DENTAL:'SOLO',SPECPROCEDURE:'SOLO',PROCEDURES:'SOLO',TRX:'SOLO',LAB:'SOLO',CIRCULATION:'SOLO',REHAB:'SOLO'},
+    T5:{RUNWAY:'MENTOR',SURGERY:'MENTOR',DENTAL:'MENTOR',SPECPROCEDURE:'MENTOR',PROCEDURES:'MENTOR',TRX:'MENTOR',LAB:'SOLO',CIRCULATION:'MENTOR',REHAB:'MENTOR'},
+    T6:{RUNWAY:'SOLO',SURGERY:'NONE',DENTAL:'NONE',SPECPROCEDURE:'INDIRECT',PROCEDURES:'NONE',TRX:'INDIRECT',LAB:'SOLO',CIRCULATION:'SOLO',REHAB:'INDIRECT'},
+    T7:{RUNWAY:'MENTOR',SURGERY:'MENTOR',DENTAL:'MENTOR',SPECPROCEDURE:'MENTOR',PROCEDURES:'MENTOR',TRX:'MENTOR',LAB:'MENTOR',CIRCULATION:'MENTOR',REHAB:'MENTOR'},
+    T8:{RUNWAY:'SOLO',SURGERY:'MENTOR',DENTAL:'NONE',SPECPROCEDURE:'MENTOR',PROCEDURES:'MENTOR',TRX:'MENTOR',LAB:'MENTOR',CIRCULATION:'MENTOR',REHAB:'NONE'},
+    T9:{RUNWAY:'SOLO',SURGERY:'MENTOR',DENTAL:'SOLO',SPECPROCEDURE:'MENTOR',PROCEDURES:'MENTOR',TRX:'MENTOR',LAB:'MENTOR',CIRCULATION:'MENTOR',REHAB:'NONE'},
+    T10:{RUNWAY:'MENTOR',SURGERY:'MENTOR',DENTAL:'MENTOR',SPECPROCEDURE:'MENTOR',PROCEDURES:'MENTOR',TRX:'MENTOR',LAB:'MENTOR',CIRCULATION:'MENTOR',REHAB:'MENTOR'},
+    T11:{RUNWAY:'SOLO',SURGERY:'MENTOR',DENTAL:'SOLO',SPECPROCEDURE:'MENTOR',PROCEDURES:'MENTOR',TRX:'MENTOR',LAB:'MENTOR',CIRCULATION:'MENTOR',REHAB:'NONE'},
+    T12:{RUNWAY:'MENTOR',SURGERY:'MENTOR',DENTAL:'MENTOR',SPECPROCEDURE:'MENTOR',PROCEDURES:'MENTOR',TRX:'MENTOR',LAB:'MENTOR',CIRCULATION:'MENTOR',REHAB:'MENTOR'},
+    T13:{RUNWAY:'SOLO',SURGERY:'SOLO',DENTAL:'SOLO',SPECPROCEDURE:'SOLO',PROCEDURES:'SOLO',TRX:'SOLO',LAB:'SOLO',CIRCULATION:'SOLO',REHAB:'SOLO'},
+    T14:{RUNWAY:'SOLO',SURGERY:'SOLO',DENTAL:'SOLO',SPECPROCEDURE:'SOLO',PROCEDURES:'SOLO',TRX:'SOLO',LAB:'SOLO',CIRCULATION:'SOLO',REHAB:'SOLO'},
+    T15:{RUNWAY:'INDIRECT',SURGERY:'INDIRECT',DENTAL:'INDIRECT',SPECPROCEDURE:'INDIRECT',PROCEDURES:'INDIRECT',TRX:'INDIRECT',LAB:'INDIRECT',CIRCULATION:'INDIRECT',REHAB:'INDIRECT'},
+  },
+  availBlocks: {
+    T3:[{id:'ab-t3-1',name:'Standard Schedule',start:'2026-01-01',end:null,days:{Sunday:{am:true,pm:false},Monday:{am:true,pm:true},Tuesday:{am:false,pm:false},Wednesday:{am:true,pm:true},Thursday:{am:true,pm:true},Friday:{am:true,pm:true},Saturday:{am:false,pm:false}}}],
+    T7:[{id:'ab-t7-1',name:'Standard Schedule',start:'2026-01-01',end:null,days:{Sunday:{am:false,pm:false},Monday:{am:true,pm:true},Tuesday:{am:true,pm:true},Wednesday:{am:true,pm:false},Thursday:{am:true,pm:true},Friday:{am:true,pm:true},Saturday:{am:false,pm:false}}}],
+    T12:[{id:'ab-t12-1',name:'Part-Time Regular',start:'2026-01-01',end:null,days:{Sunday:{am:false,pm:false},Monday:{am:false,pm:false},Tuesday:{am:true,pm:false},Wednesday:{am:true,pm:false},Thursday:{am:false,pm:false},Friday:{am:false,pm:false},Saturday:{am:false,pm:false}}}],
+    T13:[{id:'ab-t13-1',name:'Standard Schedule',start:'2026-01-01',end:null,days:{Sunday:{am:false,pm:false},Monday:{am:true,pm:true},Tuesday:{am:true,pm:true},Wednesday:{am:false,pm:false},Thursday:{am:true,pm:true},Friday:{am:true,pm:true},Saturday:{am:false,pm:false}}}],
+  },
+  tempOv:{},
+  prefs:{},
+  rules:{},
+  assign:{},
+};
+
+// ═══════════════════════════════════════════════════════
+// APP STATE
+// ═══════════════════════════════════════════════════════
+let currentWeekStart = '3/1/2026'; // Always the Sunday
+let demandWeekStart = '3/1/2026';  // Demand page independently navigated
+
+// Per-week doctor overrides: weekStart → {docInit → [dowIdx, ...]} (days they're OUT)
+// e.g. {'3/1/2026': {'BP': [1, 3]}} = Dr BP out Mon+Wed of week of 3/1
+const WEEK_DOC_OVERRIDES = {};
+
+// Per-week template assignments (which rotation week loaded for a given week)
+// weekStart → 1..6
+const WEEK_TEMPLATE_MAP = { '3/1/2026': 't1' };  // weekStart → template id
+
+let loadTplSelWeek = null; // which template week is selected in modal
+let selDate = '3/2/2026';
+let drawerEmpId = null;
+let draft = null;
+let dirtyTabs = new Set();
+let calState = {y:2026, m:2};
+let pickerCtx = null;
+let ruleTypeNew = null;
+let selDrWeek = 't1'; // which template id is selected in settings
+let docPickerCtx = null; // {weekNum, dayIdx, service, slotIdx}
+
+// ═══════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════
+const dc = o => JSON.parse(JSON.stringify(o));
+const emp = id => DB.emps.find(e => e.id === id);
+const skillOf = (id, area) => (DB.skills[id]||{})[area]||null;
+const skillCol = s => ({SOLO:'var(--grn)',MENTOR:'var(--acc)',INDIRECT:'var(--pur)',DIRECT:'var(--org)',NONE:'var(--tx3)'}[s]||'var(--tx3)');
+const skillCls = s => ({SOLO:'s-solo',MENTOR:'s-mentor',INDIRECT:'s-ind',DIRECT:'s-dir',NONE:'s-none'}[s]||'');
+const fname = n => (n.split(',')[1]||n).trim().split(' ')[0];
+const docByInit = init => DOCTORS.find(d => d.init === init);
+
+function weekDates(sundayStr){
+  const parts = sundayStr.split('/');
+  const base = new Date(parseInt(parts[2]), parseInt(parts[0])-1, parseInt(parts[1]));
+  return Array.from({length:7},(_,i)=>{
+    const d = new Date(base); d.setDate(d.getDate()+i);
+    return `${d.getMonth()+1}/${d.getDate()}/${d.getFullYear()}`;
+  });
+}
+
+function dateToWeekStart(dateStr){
+  const p = dateStr.split('/');
+  const d = new Date(parseInt(p[2]),parseInt(p[0])-1,parseInt(p[1]));
+  d.setDate(d.getDate() - d.getDay());
+  return `${d.getMonth()+1}/${d.getDate()}/${d.getFullYear()}`;
+}
+
+// WEEK_DATES defined as property below
+
+// Get the template for a given date
+function templateForDate(dateStr){
+  const ws = dateToWeekStart(dateStr);
+  const tId = WEEK_MAP[ws] || 't1';
+  return {tId, tData: getTplDays(tId)};
+}
+
+// Get doctor counts for a date from template
+function docCountsForDate(dateStr){
+  const p = dateStr.split('/');
+  const d = new Date(parseInt(p[2]),parseInt(p[0])-1,parseInt(p[1]));
+  const dow = d.getDay();
+  const {tData} = templateForDate(dateStr);
+  const day = tData[dow];
+
+  // Filter out vacationing doctors
+  const active = init => !(DOC_VACATIONS[init]||[]).includes(dateStr);
+  const filterDocs = arr => arr.filter(active);
+
+  const surgery  = filterDocs(day.SURGERY||[]).length;
+  const dental   = filterDocs(day.DENTAL||[]).length;
+  const specproc = filterDocs(day.SPECPROCEDURE||[]).length;
+  // Appt arrays are now flat lists
+  const apptAM  = [...new Set((day.APPT_AM||[]).filter(Boolean).filter(active))].length;
+  const apptAFT = [...new Set((day.APPT_AFT||[]).filter(Boolean).filter(active))].length;
+  const apptEVE = [...new Set((day.APPT_EVE||[]).filter(Boolean).filter(active))].length;
+  const apptPM  = Math.max(apptAFT, apptEVE);
+
+  const housecalls = filterDocs(day.HOUSECALLS||[]).length;
+  return {surgery, dental, specproc, apptAM, apptAFT, apptEVE, apptPM, housecalls, dow};
+}
+
+// Get all doctors scheduled on a given date (used for override grid)
+function getScheduledDocs(dateStr){
+  const p = dateStr.split('/');
+  const dow = new Date(parseInt(p[2]),parseInt(p[0])-1,parseInt(p[1])).getDay();
+  const ws = dateToWeekStart(dateStr);
+  const tId = WEEK_TEMPLATE_MAP[ws] ?? WEEK_MAP[ws] ?? 't1';
+  const tData = getTplDays(tId);
+  const day = tData[dow];
+  const all = new Set([
+    ...(day.SURGERY||[]), ...(day.DENTAL||[]), ...(day.SPECPROCEDURE||[]),
+    ...(day.HOUSECALLS||[]),
+    ...(day.APPT_AM||[]), ...(day.APPT_AFT||[]), ...(day.APPT_EVE||[])
+  ].filter(Boolean));
+  return [...all].sort();
+}
+
+// Compute required tech units for a date using AREA_RULES
+function computeDemand(dateStr){
+  const {surgery, dental, specproc, apptAM, apptAFT, apptPM, housecalls, dow} = docCountsForDate(dateStr);
+  const docMap = {appt_am:apptAM, appt_pm:apptPM, appt_aft:apptAFT, surgery, dental, specproc, housecalls};
+  const overrides = DAY_OVERRIDES[dateStr]||{};
+  const results = [];
+
+  AREA_RULES.forEach(rule => {
+    if(!rule.days.includes(dow)) return;
+    const ovKey = `${rule.area}_${rule.shift}`;
+    const isActive = (ovKey in overrides) ? overrides[ovKey] : rule.active;
+    if(!isActive && rule.mult === 0) return;
+    if(!isActive) return;
+
+    let count = 0;
+    if(rule.type === 'FIXED'){
+      count = rule.mult;
+    } else {
+      const docCount = docMap[rule.source] || 0;
+      const raw = docCount * rule.mult;
+      count = rule.round === 'CEIL' ? Math.ceil(raw) : Math.round(raw);
+    }
+    if(count > 0){
+      results.push({
+        area: rule.area,
+        shift: rule.shift,
+        count,
+        times: SHIFT_TIMES[`${rule.area}_${rule.shift}`]||'',
+        color: AREA_COL[rule.area]||'#888',
+      });
+    }
+  });
+  return results;
+}
+
+function slotKey(area,shift){ return `${area}_${shift}`; }
+function getSlots(date,area,shift){
+  if(!DB.assign[date]) DB.assign[date]={};
+  const k=slotKey(area,shift);
+  if(!DB.assign[date][k]) DB.assign[date][k]=[];
+  return DB.assign[date][k];
+}
+
+function getActiveBlock(id, date){
+  const blocks = DB.availBlocks[id]||[];
+  const p=date.split('/');
+  const d=new Date(parseInt(p[2]),parseInt(p[0])-1,parseInt(p[1]));
+  const matching=blocks.filter(b=>{
+    const s=new Date(b.start),e=b.end?new Date(b.end):new Date('9999-12-31');
+    return d>=s&&d<=e;
+  });
+  if(matching.length>1) return {block:null,conflict:true};
+  return {block:matching[0]||null,conflict:false};
+}
+
+function availOk(id, date, shift){
+  const e=emp(id); if(!e?.active) return {ok:false,reason:'Inactive'};
+  const p=date.split('/');
+  const d=new Date(parseInt(p[2]),parseInt(p[0])-1,parseInt(p[1]));
+  const dow=DAYS_FULL[d.getDay()];
+  const sk=shift==='AM'?'AM':'PM';
+  for(const ov of (DB.tempOv[id]||[])){
+    if(ov.date!==date) continue;
+    if(ov.type==='OFF') return {ok:false,reason:'Temp: day off'};
+    if(ov.type==='AM_ONLY'&&sk==='PM') return {ok:false,reason:'Temp: AM only'};
+    if(ov.type==='PM_ONLY'&&sk==='AM') return {ok:false,reason:'Temp: PM only'};
+  }
+  const {block,conflict}=getActiveBlock(id,date);
+  if(conflict) return {ok:false,reason:'Conflicting availability blocks'};
+  if(block){
+    const da=block.days[dow];
+    if(!da) return {ok:false,reason:'Not available'};
+    if(sk==='AM'&&!da.am) return {ok:false,reason:`Not avail ${dow} AM`};
+    if(sk==='PM'&&!da.pm) return {ok:false,reason:`Not avail ${dow} PM`};
+  } else {
+    return {ok:false,reason:'No base availability set'};
+  }
+  if(e.maxD){
+    const DATES=weekDates(currentWeekStart);
+    const dOn=DATES.filter(dt=>Object.values(DB.assign[dt]||{}).some(arr=>arr.includes(id))).length;
+    if(dOn>=e.maxD) return {ok:false,reason:`Max ${e.maxD}d/wk`};
+  }
+  return {ok:true};
+}
+
+function weekHours(id){
+  let h=0;
+  weekDates(currentWeekStart).forEach(date=>computeDemand(date).forEach(sl=>{
+    if(getSlots(date,sl.area,sl.shift).includes(id))
+      h+=sl.area==='SURGERY'?8.5:sl.shift==='AM'?7.5:7;
+  }));
+  return h;
+}
+
+function conflicts(date){
+  const out=[];
+  computeDemand(date).forEach(sl=>{
+    const a=getSlots(date,sl.area,sl.shift);
+    if(a.length<sl.count) out.push({t:'err',m:`${sl.area} ${sl.shift}: ${a.length}/${sl.count} filled`});
+  });
+  const map={};
+  computeDemand(date).forEach(sl=>getSlots(date,sl.area,sl.shift).forEach(id=>{
+    if(!map[id]) map[id]=[];
+    map[id].push(sl.shift);
+  }));
+  Object.entries(map).forEach(([id,ss])=>{
+    const e=emp(id);
+    if(ss.includes('AM')&&ss.includes('PM')&&!e?.dbl) out.push({t:'err',m:`${e?.name}: double shift not permitted`});
+    else if(ss.includes('AM')&&ss.includes('PM')) out.push({t:'warn',m:`${e?.name}: double shift (allowed)`});
+  });
+  return out;
+}
+
+// ═══════════════════════════════════════════════════════
+// SCHEDULE RENDER
+// ═══════════════════════════════════════════════════════
+function renderAll(){ renderStats(); renderDayList(); renderDayDetail(); renderRoster(); }
+
+function renderStats(){
+  const DATES=weekDates(currentWeekStart);
+  const total=DATES.reduce((s,d)=>s+computeDemand(d).reduce((a,sl)=>a+sl.count,0),0);
+  const filled=DATES.reduce((s,d)=>s+computeDemand(d).reduce((a,sl)=>a+getSlots(d,sl.area,sl.shift).length,0),0);
+  const conf=DATES.flatMap(d=>conflicts(d)).length;
+  const tNum=WEEK_MAP[currentWeekStart]||'?';
+  document.getElementById('week-stats').innerHTML=`
+    <div class="stat-box"><div class="stat-v" style="color:var(--acc)">${filled}/${total}</div><div class="stat-l">Slots Filled</div></div>
+    <div class="stat-box"><div class="stat-v" style="color:var(--grn)">${DB.emps.filter(e=>e.active).length}</div><div class="stat-l">Active Techs</div></div>
+    <div class="stat-box"><div class="stat-v" style="color:${conf?'var(--red)':'var(--grn)'}">${conf}</div><div class="stat-l">Conflicts</div></div>
+    <div class="stat-box"><div class="stat-v">${total?Math.round(filled/total*100):0}%</div><div class="stat-l">Coverage</div></div>
+    <div class="stat-box"><div class="stat-v" style="color:var(--teal)">Wk ${tNum}</div><div class="stat-l">Template</div></div>`;
+  document.getElementById('sched-sub').textContent=`Week of ${currentWeekStart} · Template ${tNum}`;
+}
+
+function renderDayList(){
+  const DATES=weekDates(currentWeekStart);
+  document.getElementById('day-list').innerHTML=DATES.map(date=>{
+    const p=date.split('/');
+    const d=new Date(parseInt(p[2]),parseInt(p[0])-1,parseInt(p[1]));
+    const dow=DAYS_FULL[d.getDay()];
+    const sl=computeDemand(date);
+    const need=sl.reduce((s,x)=>s+x.count,0);
+    const fill=sl.reduce((s,x)=>s+getSlots(date,x.area,x.shift).length,0);
+    const pct=need>0?Math.round(fill/need*100):100;
+    const col=pct===100?'var(--grn)':pct>50?'var(--yel)':'var(--red)';
+    return `<div class="day-item ${date===selDate?'sel':''}" onclick="selDay('${date}')">
+      <div style="display:flex;justify-content:space-between;margin-bottom:.3rem">
+        <div><div style="font-weight:600;font-size:.85rem">${dow}</div><div style="font-size:.68rem;color:var(--tx3)">${date.replace('/2026','')}</div></div>
+        <span style="font-size:.75rem;font-weight:700;color:${col}">${pct}%</span>
+      </div>
+      <div style="height:3px;background:var(--surf3);border-radius:2px"><div style="height:100%;width:${pct}%;background:${col};border-radius:2px"></div></div>
+      <div style="font-size:.67rem;color:var(--tx3);margin-top:.3rem">${fill}/${need}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderDayDetail(){
+  const date=selDate;
+  const p=date.split('/');
+  const d=new Date(parseInt(p[2]),parseInt(p[0])-1,parseInt(p[1]));
+  const dow=DAYS_FULL[d.getDay()];
+  const el=document.getElementById('day-detail');
+  const sl=computeDemand(date);
+  if(!sl.length){el.innerHTML='<div class="card" style="text-align:center;padding:3rem;color:var(--tx3)">No staffing required.</div>';return;}
+
+  const cards=sl.map(x=>{
+    const f=getSlots(date,x.area,x.shift).length;
+    const sc=f>=x.count?'var(--grn)':f>0?'var(--yel)':'var(--red)';
+    return `<div class="dc" style="border-left:3px solid ${x.color}">
+      <div style="font-size:.64rem;font-weight:700;text-transform:uppercase;color:${x.color}">${x.area}</div>
+      <div style="font-size:.66rem;color:var(--tx3)">${x.shift}·${x.times}</div>
+      <div style="font-size:1.05rem;font-weight:700;color:${sc};margin-top:.25rem">${f}<span style="font-size:.7rem;color:var(--tx3);font-weight:400">/${x.count}</span></div>
+    </div>`;
+  }).join('');
+
+  const rows=sl.map(x=>{
+    const asgn=getSlots(date,x.area,x.shift);
+    const f=asgn.length,n=x.count;
+    const sb=f>n?`<span class="badge b-ov">+${f-n}</span>`:f===n?`<span class="badge b-ok">✓</span>`:f>0?`<span class="badge b-warn">Need ${n-f}</span>`:`<span class="badge b-err">Unfilled</span>`;
+    const chips=asgn.map(id=>{
+      const e=emp(id);const sk=skillOf(id,x.area);const sc=skillCol(sk);
+      return `<span class="chip" style="border-color:${sc}50"><span class="sdot" style="background:${sc}"></span>${fname(e?.name||id)}<span style="font-size:.6rem;background:${sc}20;color:${sc};padding:.08rem .3rem;border-radius:3px;margin-left:1px">${sk||'?'}</span><button class="chip-x" onclick="removeAssign('${date}','${x.area}','${x.shift}','${id}')">×</button></span>`;
+    }).join('');
+    return sectionHeader + `<tr>
+      <td style="font-weight:700;color:${x.color}">${x.area}</td>
+      <td style="font-size:.73rem;color:var(--tx3)">${x.shift}</td>
+      <td style="font-size:.71rem;color:var(--tx3)">${x.times}</td>
+      <td>${sb}</td>
+      <td><div class="slot-row">${chips}<button class="add-btn" onclick="openPicker(event,'${date}','${x.area}','${x.shift}')">＋ Add</button></div></td>
+    </tr>`;
+  }).join('');
+
+  const confs=conflicts(date);
+  const confH=confs.length?`<div class="card" style="border-color:#5a1f1f">
+    <div class="slbl" style="color:var(--red)">⚠ ${confs.length} Issue${confs.length>1?'s':''}</div>
+    ${confs.map(c=>`<div class="conf-row conf-${c.t}">${c.t==='warn'?'⚡':'🚨'} ${c.m}</div>`).join('')}
+  </div>`:'';
+
+  // Show doctor counts for this day
+  const {surgery,dental,specproc,apptAM,apptAFT,apptEVE}=docCountsForDate(date);
+  const docSummary=`<div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem;font-size:.75rem">
+    <span style="color:var(--pur)">Surgery: ${surgery}</span>
+    <span style="color:var(--grn)">Dental: ${dental}</span>
+    <span style="color:var(--teal)">Spec: ${specproc}</span>
+    <span style="color:#8ab4f8">AM Appts: ${apptAM}</span>
+    <span style="color:#8ab4f8">AFT Appts: ${apptAFT}</span>
+    <span style="color:#8ab4f8">Eve Appts: ${apptEVE}</span>
+  </div>`;
+
+  el.innerHTML=`
+    <div class="card"><div class="slbl">${dow} ${date.replace('/2026','')} — Doctor Counts &amp; Demand</div>${docSummary}<div class="dg">${cards}</div></div>
+    <div class="card" style="overflow-x:auto"><div class="slbl">Assignments</div>
+      <table class="tbl"><thead><tr><th>Area</th><th>Shift</th><th>Hours</th><th>Status</th><th>Assigned</th></tr></thead><tbody>${rows}</tbody></table>
+    </div>${confH}`;
+}
+
+function removeAssign(date,area,shift,id){
+  const k=slotKey(area,shift);
+  if(DB.assign[date]?.[k]) DB.assign[date][k]=DB.assign[date][k].filter(x=>x!==id);
+  renderAll();
+}
+function addAssign(date,area,shift,id){
+  const a=getSlots(date,area,shift);
+  if(!a.includes(id)) a.push(id);
+  renderAll();
+}
+
+// ═══════════════════════════════════════════════════════
+// ROSTER
+// ═══════════════════════════════════════════════════════
+let rosterPoolFilter = 'ALL'; // 'ALL' or a pool ID
+
+function renderRoster(){
+  const DATES=weekDates(currentWeekStart);
+  const todayStr=DATES[1]||DATES[0];
+
+  // Build filter bar
+  const filterBar=document.getElementById('pool-filter-bar');
+  if(filterBar){
+    filterBar.innerHTML=[{id:'ALL',label:'All Staff',color:'var(--tx2)'},...POOLS].map(p=>{
+      const active=rosterPoolFilter===p.id;
+      const col=p.color||'var(--tx2)';
+      return `<button class="pool-filter-btn ${active?'pf-active':''}" style="${active?`color:${col};border-color:${col};background:${col}18`:''}" onclick="rosterPoolFilter='${p.id}';renderRoster()">${p.label||p.id}</button>`;
+    }).join('');
+  }
+
+  // Filter emps
+  const visibleEmps = rosterPoolFilter==='ALL'
+    ? DB.emps
+    : DB.emps.filter(e=>e.pool===rosterPoolFilter);
+
+  // Group by pool if showing ALL
+  let html='';
+  if(rosterPoolFilter==='ALL'){
+    POOLS.forEach(pool=>{
+      const poolEmps=DB.emps.filter(e=>e.pool===pool.id);
+      if(!poolEmps.length) return;
+      html+=`<div class="pool-section-hdr"><span class="pool-section-lbl" style="color:${pool.color}">${pool.label}</span><span class="pool-section-count">${poolEmps.filter(e=>e.active).length} active</span></div>`;
+      html+=poolEmps.map(e=>empCard(e,todayStr)).join('');
+    });
+  } else {
+    html=visibleEmps.map(e=>empCard(e,todayStr)).join('');
+    if(!visibleEmps.length) html=`<div style="grid-column:1/-1;color:var(--tx3);padding:2rem;text-align:center;font-size:.85rem">No ${rosterPoolFilter} staff added yet. Add employees in Settings.</div>`;
+  }
+  document.getElementById('roster-grid').innerHTML=html;
+}
+
+function empCard(e,todayStr){
+  const pool=POOLS.find(p=>p.id===e.pool)||{color:'#888',label:e.pool||'?'};
+  const h=weekHours(e.id);
+  const pct=e.maxH?Math.min(h/e.maxH*100,100):0;
+  const bc=pct>90?'var(--red)':pct>70?'var(--yel)':'var(--grn)';
+  const {block:rBlock}=getActiveBlock(e.id,todayStr);
+  const dots=DAYS_FULL.map((dow,i)=>{
+    let c='dd-off';
+    if(rBlock){const da=rBlock.days[dow]||{am:false,pm:false};if(da.am&&da.pm)c='dd-on';else if(da.am||da.pm)c='dd-pt';}
+    return `<div class="dd ${c}" title="${dow}">${DAYS_SHORT[i]}</div>`;
+  }).join('');
+  // Show relevant area tags for this pool
+  const poolAreas=(pool.areas||['RUNWAY','SURGERY','DENTAL','SPECPROCEDURE','LAB']);
+  const stags=poolAreas.slice(0,6).map(a=>{
+    const s=(DB.skills[e.id]||{})[a];
+    if(!s||s==='NONE') return '';
+    return `<span class="stag ${skillCls(s)}" style="font-size:.58rem">${a.replace('_',' ').slice(0,6)}</span>`;
+  }).join('');
+  const pills=[
+    !e.active?`<span style="font-size:.6rem;background:var(--red-d);color:var(--red);padding:.08rem .32rem;border-radius:3px">Inactive</span>`:'',
+    e.dbl?`<span style="font-size:.6rem;background:var(--acc-d);color:var(--acc);padding:.08rem .32rem;border-radius:3px">DBL</span>`:'',
+    e.maxD?`<span style="font-size:.6rem;background:var(--yel-d);color:var(--yel);padding:.08rem .32rem;border-radius:3px">${e.maxD}d/wk</span>`:'',
+    !e.ft?`<span style="font-size:.6rem;background:var(--surf3);color:var(--tx3);padding:.08rem .32rem;border-radius:3px">PT</span>`:'',
+  ].filter(Boolean).join('');
+  // Pool badge (shown when in ALL view)
+  const poolBadge=rosterPoolFilter==='ALL'?`<span style="font-size:.58rem;padding:.06rem .32rem;border-radius:3px;background:${pool.color}18;color:${pool.color};font-weight:700;border:1px solid ${pool.color}44">${pool.id}</span>`:'';
+  return `<div class="rc" data-empid="${e.id}">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.35rem">
+      <div>
+        <div style="font-weight:600;font-size:.88rem">${e.name}</div>
+        <div style="font-size:.7rem;color:var(--tx3);display:flex;gap:.4rem;align-items:center">${e.id} · ${e.maxH||'—'}h ${poolBadge}</div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;justify-content:flex-end;gap:3px">${pills}</div>
+    </div>
+    <div class="day-dots">${dots}</div>
+    <div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:.5rem">${stags}</div>
+    ${e.maxH&&e.active?`<div style="display:flex;justify-content:space-between;font-size:.63rem;color:var(--tx3);margin-bottom:3px"><span>This week</span><span style="color:${bc}">${h.toFixed(1)}h</span></div><div class="hbar"><div class="hbar-fill" style="width:${pct}%;background:${bc}"></div></div>`:''}
+    <div style="margin-top:.65rem;font-size:.72rem;color:var(--acc);font-weight:600">Open Profile →</div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// DEMAND PAGE
+// ═══════════════════════════════════════════════════════
+// ─── DEMAND PAGE ─────────────────────────────────────────────────────────────
+function shiftDemandWeek(dir){
+  const p=demandWeekStart.split('/');
+  const d=new Date(parseInt(p[2]),parseInt(p[0])-1,parseInt(p[1]));
+  d.setDate(d.getDate()+dir*7);
+  demandWeekStart=`${d.getMonth()+1}/${d.getDate()}/${d.getFullYear()}`;
+  renderDemandPage();
+}
+
+function renderDemandPage(){
+  const DATES=weekDates(demandWeekStart);
+  const ws=demandWeekStart;
+  const tNum=WEEK_TEMPLATE_MAP[ws]??WEEK_MAP[ws]??'—';
+
+  // Week nav bar
+  const endDate=DATES[6];
+  const fmtD=s=>{const p=s.split('/');return `${MONTHS[parseInt(p[0])-1].slice(0,3)} ${p[1]}`;};
+  document.getElementById('dem-nav-dates').textContent=`${fmtD(DATES[0])} – ${fmtD(endDate)}, ${DATES[0].split('/')[2]}`;
+  document.getElementById('dem-nav-sub').textContent=tNum!=='—'?`Template: Week ${tNum}`:'No template loaded — click Load Template';
+
+  // Build day headers (shared)
+  const dayHeaders=DATES.map(date=>{
+    const dow=getDow(date);
+    const ws2=dateToWeekStart(date);
+    const weekOverrides=WEEK_DOC_OVERRIDES[ws2]||{};
+    const outCount=Object.values(weekOverrides).filter(days=>days.includes(new Date(...date.split('/').reverse().map((v,i)=>i===1?v-1:parseInt(v))).getDay())).length;
+    const ovBadge=outCount?`<span style="font-size:.58rem;color:var(--red);margin-left:.25rem">-${outCount}</span>`:'';
+    return `<th>${dow.slice(0,3)}${ovBadge}<br><span style="font-weight:400;font-size:.68rem">${date.replace('/2026','')}</span></th>`;
+  }).join('');
+
+  // ── Doctor override grid ──────────────────────────────────────────────────
+  // Collect all doctors that appear anywhere in this week's template
+  const allDocs=new Set();
+  DATES.forEach(date=>getScheduledDocs(date).forEach(d=>allDocs.add(d)));
+  const docList=[...allDocs].sort();
+
+  // Service labels for each doctor per day
+  const weekOverrides=WEEK_DOC_OVERRIDES[ws]||{};
+
+  // Build grid: rows = doctors, cols = days
+  const colW=`repeat(${DATES.length}, 1fr)`;
+  const gridStyle=`grid-template-columns: 90px ${colW}`;
+
+  const dayHdrRow=`<div style="display:grid;${gridStyle};gap:.25rem;margin-bottom:.25rem">
+    <div></div>
+    ${DATES.map(date=>`<div style="font-size:.65rem;font-weight:700;text-align:center;color:var(--tx3)">${getDow(date).slice(0,3)}<br><span style="font-weight:400">${date.split('/').slice(0,2).join('/')}</span></div>`).join('')}
+  </div>`;
+
+  const docRows2=docList.map(init=>{
+    const outDays=weekOverrides[init]||[];
+    const cells=DATES.map((date,di)=>{
+      const p=date.split('/');
+      const dow=new Date(parseInt(p[2]),parseInt(p[0])-1,parseInt(p[1])).getDay();
+      const scheduledHere=getScheduledDocs(date).includes(init);
+      if(!scheduledHere) return `<div class="doc-ov-cell not-scheduled">—</div>`;
+      const isOut=outDays.includes(dow);
+      return `<div class="doc-ov-cell ${isOut?'absent':'present'}" onclick="toggleDocOut('${ws}','${init}',${dow})" title="${init} ${isOut?'OUT':'IN'} ${getDow(date)}">${isOut?'OUT':init}</div>`;
+    }).join('');
+    const hasOut=outDays.length>0;
+    return `<div style="display:grid;${gridStyle};gap:.25rem;margin-bottom:.2rem">
+      <div class="doc-ov-name" style="${hasOut?'color:var(--red)':''}" title="Dr. ${init}">${init}${hasOut?` <span style="font-size:.6rem;color:var(--red)">(${outDays.length}d out)</span>`:''}</div>
+      ${cells}
+    </div>`;
+  }).join('');
+
+  const noDocsMsg=docList.length===0?`<div style="color:var(--tx3);font-size:.82rem;padding:.75rem 0">No template loaded for this week. Use <strong>Load Template</strong> to apply a rotation week.</div>`:'';
+  document.getElementById('dem-doc-grid').innerHTML=dayHdrRow+docRows2+noDocsMsg;
+
+  // ── Units table ───────────────────────────────────────────────────────────
+  const poolOrder=['LVT','ASST','PSR','PCR','PHARM'];
+  const getRulePool = r => r.pool || (
+    ['PSR_FRONT','PSR_PHONE'].includes(r.area)?'PSR':
+    r.area==='PCR'?'PCR':r.area==='PHARM'?'PHARM':
+    r.role==='asst'?'ASST':'LVT'
+  );
+  let unitRows='';
+  poolOrder.forEach(poolId=>{
+    const pool=POOLS.find(p=>p.id===poolId); if(!pool) return;
+    const poolRules=AREA_RULES.filter(r=>getRulePool(r)===poolId);
+    if(!poolRules.length) return;
+    unitRows+=`<tr><td colspan="${DATES.length+3}" style="background:${pool.color}15;border-left:3px solid ${pool.color};padding:.4rem .8rem">
+      <span style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:${pool.color}">${pool.label}</span>
+    </td></tr>`;
+    poolRules.forEach(rule=>{
+      if(!rule.active && rule.mult===0) return;
+      const {area,shift}=rule;
+      const col=AREA_COL[area]||'#888';
+      const ruleDesc=rule.type==='FIXED'?`Fixed ${rule.mult}`:
+        `×${rule.mult}${rule.round==='CEIL'?' ⌈⌉':''}`;
+      const roleBadge=rule.role==='asst'
+        ?`<span style="font-size:.56rem;padding:.05rem .28rem;border-radius:2px;background:#3d2e09;color:#fbbf24;font-weight:700">ASST</span>`
+        :rule.role==='tech_or_asst'
+        ?`<span style="font-size:.56rem;padding:.05rem .28rem;border-radius:2px;background:var(--surf3);color:var(--tx2);font-weight:700">T/A</span>`
+        :rule.pool
+        ?`<span style="font-size:.56rem;padding:.05rem .28rem;border-radius:2px;background:${pool.color}20;color:${pool.color}">${poolId}</span>`
+        :`<span style="font-size:.56rem;padding:.05rem .28rem;border-radius:2px;background:var(--acc-d);color:var(--acc);font-weight:700">TECH</span>`;
+      const cells=DATES.map(date=>{
+        const dem=computeDemand(date);
+        const entry=dem.find(x=>x.area===area&&x.shift===shift);
+        const n=entry?entry.count:0;
+        return `<td class="unit-cell ${n>0?'unit-pos':'unit-zero'}">${n||'—'}</td>`;
+      }).join('');
+      unitRows+=`<tr><td>${roleBadge}</td><td class="area-col" style="color:${col}">${area}</td><td style="font-size:.7rem;color:var(--tx3)">${shift} <span style="opacity:.6">${ruleDesc}</span></td>${cells}</tr>`;
+    });
+  });
+  document.getElementById('demand-units-tbl').innerHTML=`<thead><tr><th></th><th class="area-col">Area</th><th>Shift/Rule</th>${dayHeaders}</tr></thead><tbody>${unitRows}</tbody>`;
+}
+
+function toggleDocOut(weekStart, docInit, dow){
+  if(!WEEK_DOC_OVERRIDES[weekStart]) WEEK_DOC_OVERRIDES[weekStart]={};
+  const outDays=WEEK_DOC_OVERRIDES[weekStart][docInit]||[];
+  const idx=outDays.indexOf(dow);
+  if(idx>=0) outDays.splice(idx,1); else outDays.push(dow);
+  WEEK_DOC_OVERRIDES[weekStart][docInit]=outDays;
+  renderDemandPage();
+}
+
+function clearAllOverrides(){
+  delete WEEK_DOC_OVERRIDES[demandWeekStart];
+  renderDemandPage();
+}
+
+function openLoadTemplate(){
+  const el=document.getElementById('load-tpl-backdrop');
+  el.style.display='flex';
+  document.getElementById('tpl-target-week').textContent=`week of ${demandWeekStart}`;
+  loadTplSelWeek=null;
+  document.getElementById('tpl-apply-btn').disabled=true;
+  document.getElementById('tpl-week-btns').innerHTML=TEMPLATES.map(t=>{
+    const isCurrent=WEEK_TEMPLATE_MAP[demandWeekStart]===t.id||WEEK_MAP[demandWeekStart]===t.id;
+    return `<div class="tpl-week-btn${isCurrent?' tpl-sel':''}" onclick="selLoadTpl('${t.id}',this)">
+      ${t.name}
+      ${isCurrent?'<span class="tpl-desc">currently applied</span>':''}
+    </div>`;
+  }).join('');
+  if(WEEK_TEMPLATE_MAP[demandWeekStart]||WEEK_MAP[demandWeekStart]){
+    loadTplSelWeek=WEEK_TEMPLATE_MAP[demandWeekStart]||WEEK_MAP[demandWeekStart];
+    document.getElementById('tpl-apply-btn').disabled=false;
+  }
+}
+
+function selLoadTpl(id, el){
+  loadTplSelWeek=id;
+  document.querySelectorAll('.tpl-week-btn').forEach(b=>b.classList.remove('tpl-sel'));
+  el.classList.add('tpl-sel');
+  document.getElementById('tpl-apply-btn').disabled=false;
+}
+
+function applyTemplate(){
+  if(!loadTplSelWeek) return;
+  WEEK_TEMPLATE_MAP[demandWeekStart]=loadTplSelWeek;
+  delete WEEK_DOC_OVERRIDES[demandWeekStart];
+  closeLoadTemplate();
+  renderDemandPage();
+  const tpl=getTpl(loadTplSelWeek);
+  toast(`"${tpl?.name||loadTplSelWeek}" applied to week of ${demandWeekStart}`);
+}
+
+function closeLoadTemplate(){
+  document.getElementById('load-tpl-backdrop').style.display='none';
+}
+
+// ═══════════════════════════════════════════════════════
+// SETTINGS — AREA RULES
+// ═══════════════════════════════════════════════════════
+function renderAreaRules(){
+  let lastSection = null;
+  const rows=AREA_RULES.map((r,i)=>{
+    let sectionHeader = '';
+    if(r._sectionBreak && r._sectionBreak !== lastSection){
+      lastSection = r._sectionBreak;
+      sectionHeader = `<tr><td colspan="8" style="font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--tx3);padding:.4rem .6rem;background:var(--surf3)">${r._sectionBreak}</td></tr>`;
+    }
+    const col=AREA_COL[r.area]||'#888';
+    const typeTag=r.type==='FIXED'?`<span class="rule-chip fixed">FIXED ×${r.mult}</span>`:`<span class="rule-chip perdoc">PER DOC ×${r.mult}${r.round==='CEIL'?' ⌈⌉':''}</span>`;
+    const dayStr=r.days.map(d=>DAYS_SHORT[d]).join(' ');
+    const activeChk=`<label class="tog" style="display:inline-block"><input type="checkbox" ${r.active?'checked':''} onchange="AREA_RULES[${i}].active=this.checked;renderAreaRules();renderDemandPage();"><div class="tog-track"></div><div class="tog-knob"></div></label>`;
+    const roleBadge = r.role === 'asst'
+      ? `<span style="font-size:.62rem;padding:.1rem .35rem;border-radius:3px;background:#3d2e09;color:#fbbf24;font-weight:700">ASST</span>`
+      : r.role === 'tech_or_asst'
+      ? `<span style="font-size:.62rem;padding:.1rem .35rem;border-radius:3px;background:var(--surf3);color:var(--tx3);font-weight:700">T/A</span>`
+      : `<span style="font-size:.62rem;padding:.1rem .35rem;border-radius:3px;background:var(--acc-d);color:var(--acc);font-weight:700">TECH</span>`;
+    return `<tr>
+      <td><span class="area-dot" style="background:${col}"></span></td>
+      <td style="font-weight:700;color:${col}">${r.area}</td>
+      <td style="font-size:.75rem;color:var(--tx3)">${r.shift}</td>
+      <td>${roleBadge}</td>
+      <td>${typeTag}</td>
+      <td style="font-size:.72rem;color:var(--tx3)">${dayStr}</td>
+      <td>${activeChk}</td>
+      <td style="font-size:.72rem;color:var(--tx3);max-width:200px">${r.note}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('area-rules-tbl').innerHTML=`
+    <thead><tr><th></th><th>Area</th><th>Shift</th><th>Fills</th><th>Rule</th><th>Days</th><th>Active</th><th>Notes</th></tr></thead>
+    <tbody>${rows}</tbody>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// SETTINGS — DOCTOR SCHEDULE GRID
+// ═══════════════════════════════════════════════════════
+// ─── TEMPLATE MANAGEMENT ─────────────────────────────────────────────────────
+let newTplSource = 'blank'; // 'blank' or a template id
+
+function openCreateTemplate(){
+  document.getElementById('new-tpl-name').value = '';
+  newTplSource = 'blank';
+  // Build source options: blank + copy from each existing template
+  const opts = [
+    {val:'blank', label:'Blank template', sub:'Start with an empty grid'},
+    ...TEMPLATES.map(t=>({val:t.id, label:`Copy "${t.name}"`, sub:'Duplicate all doctor assignments'}))
+  ];
+  document.getElementById('new-tpl-source-opts').innerHTML = opts.map((o,i)=>
+    `<label class="tpl-src-opt ${i===0?'tso-sel':''}" onclick="selectTplSrc('${o.val}',this)">
+      <input type="radio" name="tpl-src" value="${o.val}" ${i===0?'checked':''} style="pointer-events:none">
+      <div><div style="font-weight:600">${o.label}</div><div style="font-size:.68rem;color:var(--tx3)">${o.sub}</div></div>
+    </label>`
+  ).join('');
+  const el = document.getElementById('create-tpl-backdrop');
+  el.style.display = 'flex';
+  setTimeout(()=>document.getElementById('new-tpl-name').focus(), 50);
+}
+
+function selectTplSrc(val, el){
+  newTplSource = val;
+  document.querySelectorAll('.tpl-src-opt').forEach(e=>e.classList.remove('tso-sel'));
+  el.classList.add('tso-sel');
+}
+
+function closeCreateTemplate(){
+  document.getElementById('create-tpl-backdrop').style.display = 'none';
+}
+
+function confirmCreateTemplate(){
+  const name = document.getElementById('new-tpl-name').value.trim();
+  if(!name){ document.getElementById('new-tpl-name').focus(); return; }
+  // Generate unique id
+  const id = 'tpl_' + Date.now();
+  const days = newTplSource === 'blank'
+    ? makeEmptyTemplate()
+    : JSON.parse(JSON.stringify(getTplDays(newTplSource))); // deep copy
+  TEMPLATES.push({id, name, days});
+  selDrWeek = id;
+  closeCreateTemplate();
+  renderDrSchedule();
+  // Update load template modal and week assign if open
+  renderWeekAssign();
+  toast(`Template "${name}" created`);
+}
+
+function renameTpl(){
+  const tpl = getTpl(selDrWeek);
+  if(!tpl) return;
+  const name = prompt('Rename template:', tpl.name);
+  if(name && name.trim()) {
+    tpl.name = name.trim();
+    renderDrSchedule();
+    renderWeekAssign();
+    toast('Template renamed');
+  }
+}
+
+function deleteTpl(){
+  if(TEMPLATES.length <= 1){ toast('Cannot delete the last template'); return; }
+  const tpl = getTpl(selDrWeek);
+  if(!tpl) return;
+  if(!confirm(`Are you sure you want to delete the entire template "${tpl.name}"?\n\nAny calendar weeks assigned to it will become unassigned. This cannot be undone.`)) return;
+  // Remove from TEMPLATES
+  const idx = TEMPLATES.findIndex(t=>t.id===selDrWeek);
+  TEMPLATES.splice(idx, 1);
+  // Remove from WEEK_MAP
+  Object.keys(WEEK_MAP).forEach(ws=>{ if(WEEK_MAP[ws]===selDrWeek) delete WEEK_MAP[ws]; });
+  Object.keys(WEEK_TEMPLATE_MAP).forEach(ws=>{ if(WEEK_TEMPLATE_MAP[ws]===selDrWeek) delete WEEK_TEMPLATE_MAP[ws]; });
+  selDrWeek = TEMPLATES[0].id;
+  renderDrSchedule();
+  renderWeekAssign();
+  toast(`Template deleted`);
+}
+
+function renderDrSchedule(){
+  // Populate dropdown
+  const sel = document.getElementById('tpl-select');
+  if(sel){
+    const prev = sel.value || selDrWeek;
+    sel.innerHTML = TEMPLATES.map(t=>
+      `<option value="${t.id}" ${t.id===selDrWeek?'selected':''}>${t.name}</option>`
+    ).join('');
+    if(!TEMPLATES.find(t=>t.id===selDrWeek)) selDrWeek = TEMPLATES[0]?.id || 't1';
+    sel.value = selDrWeek;
+  }
+  const tData=getTplDays(selDrWeek);
+  const dayHeaders=DAYS_FULL.map(d=>`<th>${d.slice(0,3)}</th>`).join('');
+
+  const bodyHTML=DR_SERVICES.map(svc=>{
+    const col=AREA_COL[svc.key==='APPT_AM'||svc.key==='APPT_AFT'||svc.key==='APPT_EVE'?'RUNWAY':svc.key]||'var(--tx3)';
+    const cells=DAYS_FULL.map((_,di)=>{
+      const docs=(tData[di][svc.key]||[]).filter(Boolean);
+      const tplId=selDrWeek; // capture as local for template literal
+      const chips=docs.map(init=>
+        `<span class="dr-chip ${svc.cls}">${init}<button class="dr-chip-x" onclick="event.stopPropagation();removeDrDoc('${tplId}',${di},'${svc.key}','${init}')">×</button></span>`
+      ).join('');
+      return `<td><div class="dr-cell" onclick="openDocPicker(event,'${tplId}',${di},'${svc.key}')">${chips}<span class="dr-add">＋</span></div></td>`;
+    }).join('');
+    return `<tr><td class="row-lbl" style="color:${col};font-weight:600">${svc.label}</td>${cells}</tr>`;
+  }).join('');
+
+  document.getElementById('dr-schedule-grid').innerHTML=
+    `<thead><tr><th class="row-lbl">Service</th>${dayHeaders}</tr></thead><tbody>${bodyHTML}</tbody>`;
+}
+
+function removeDrDoc(weekNum,dayIdx,service,init){
+  const tpl=getTpl(weekNum); if(!tpl) return;
+  const arr=tpl.days[dayIdx][service]||[];
+  const i=arr.indexOf(init); if(i>=0) arr.splice(i,1);
+  tpl.days[dayIdx][service]=arr;
+  renderDrSchedule(); renderDemandPage(); renderAll();
+}
+
+function openDocPicker(ev,weekNum,dayIdx,service){
+  ev.stopPropagation();
+  docPickerCtx={weekNum,dayIdx,service};
+  const pk=document.getElementById('doc-picker');
+  refreshDocPickerContent(weekNum,dayIdx,service);
+  pk.style.display='block';
+  const r=ev.currentTarget.getBoundingClientRect();
+  pk.style.top=Math.min(r.bottom+4, window.innerHeight-260)+'px';
+  pk.style.left=Math.min(r.left, window.innerWidth-200)+'px';
+  setTimeout(()=>document.addEventListener('click',closeDocPicker,{once:true}),10);
+}
+function closeDocPicker(){ document.getElementById('doc-picker').style.display='none'; docPickerCtx=null; }
+function pickDoc(init){
+  if(!docPickerCtx) return;
+  const {weekNum,dayIdx,service}=docPickerCtx;
+  const tpl=getTpl(weekNum); if(!tpl) return;
+  const arr=tpl.days[dayIdx][service]||[];
+  const i=arr.indexOf(init);
+  if(i>=0) arr.splice(i,1); else arr.push(init);
+  tpl.days[dayIdx][service]=arr;
+  // Re-render picker content in place (keep it open)
+  refreshDocPickerContent(weekNum,dayIdx,service);
+  renderDrSchedule(); renderDemandPage(); renderAll();
+}
+
+function refreshDocPickerContent(weekNum,dayIdx,service){
+  const existing=(getTplDays(weekNum)||{})[dayIdx]?.[service]||[];
+  const pk=document.getElementById('doc-picker');
+  pk.innerHTML=`<div style="padding:.35rem .75rem;font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3)">Add / Remove</div>`+
+    DOCTORS.map(d=>{
+      const already=existing.includes(d.init);
+      return `<div class="doc-pk-row" onclick="pickDoc('${d.init}')" style="${already?'color:var(--acc)':''}">
+        <span style="font-weight:700;min-width:32px;color:${already?'var(--acc)':'var(--tx)'}">${d.init}</span>
+        ${already?'<span style="margin-left:auto;font-size:.7rem">✓</span>':''}
+      </div>`;
+    }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// SETTINGS — WEEK ASSIGNMENT
+// ═══════════════════════════════════════════════════════
+function renderWeekAssign(){
+  // Show 12 weeks centered on current
+  const p=currentWeekStart.split('/');
+  const base=new Date(parseInt(p[2]),parseInt(p[0])-1,parseInt(p[1]));
+  base.setDate(base.getDate()-base.getDay()); // snap to Sunday
+  let html='';
+  for(let w=0;w<12;w++){
+    const ws=new Date(base); ws.setDate(base.getDate()+w*7);
+    const wsStr=`${ws.getMonth()+1}/${ws.getDate()}/${ws.getFullYear()}`;
+    const we=new Date(ws); we.setDate(ws.getDate()+6);
+    const weStr=`${we.getMonth()+1}/${we.getDate()}/${we.getFullYear()}`;
+    const tId=WEEK_MAP[wsStr]||null;
+    const tpl=getTpl(tId);
+    const isActive=wsStr===currentWeekStart;
+    html+=`<div style="display:flex;align-items:center;gap:.75rem;padding:.65rem .9rem;background:var(--surf2);border:1px solid ${isActive?'var(--acc)':'var(--bdr)'};border-radius:9px;margin-bottom:.4rem">
+      <div style="min-width:170px;font-size:.82rem">${wsStr.replace('/2026','')} – ${weStr.replace('/2026','')}</div>
+      <div style="flex:1">
+        <select onchange="WEEK_MAP['${wsStr}']=this.value||null;renderAll();renderDemandPage();" style="max-width:220px;padding:.28rem .5rem;font-size:.78rem">
+          <option value="">— unassigned —</option>
+          ${TEMPLATES.map(t=>`<option value="${t.id}" ${tId===t.id?'selected':''}>${t.name}</option>`).join('')}
+        </select>
+      </div>
+      ${isActive?`<span style="font-size:.65rem;font-weight:700;color:var(--acc);background:var(--acc-d);padding:.1rem .4rem;border-radius:3px">Current</span>`:''}
+      ${tpl?`<span style="font-size:.72rem;font-weight:700;padding:.15rem .5rem;border-radius:4px;background:var(--surf3);color:var(--tx2)">${tpl.name}</span>`:''}
+    </div>`;
+  }
+  document.getElementById('week-assign-content').innerHTML=html;
+}
+
+// ═══════════════════════════════════════════════════════
+// PICKER (TECH)
+// ═══════════════════════════════════════════════════════
+function openPicker(ev,date,area,shift){
+  ev.stopPropagation();
+  pickerCtx={date,area,shift};
+  const already=getSlots(date,area,shift);
+  const good=[],bad=[];
+  DB.emps.filter(e=>e.active).forEach(e=>{
+    if(already.includes(e.id)) return;
+    const av=availOk(e.id,date,shift);
+    const sk=skillOf(e.id,area);
+    const canWork=sk&&sk!=='NONE';
+    const working=computeDemand(date).some(sl=>getSlots(date,sl.area,sl.shift).includes(e.id));
+    if(av.ok&&canWork) good.push({e,sk,working});
+    else bad.push({e,reason:av.ok?`No skill (${sk||'—'})`:av.reason});
+  });
+  good.sort((a,b)=>(SKILL_RANK[b.sk]||0)-(SKILL_RANK[a.sk]||0));
+  let h='';
+  if(good.length) h+=`<div class="pk-lbl">✓ ${area} ${shift}</div>`+good.map(({e,sk,working})=>{
+    const sc=skillCol(sk);
+    return `<div class="pk-row" onclick="doPick('${e.id}')"><span class="sdot" style="background:${sc}"></span><span style="flex:1">${e.name}</span>${working?`<span style="font-size:.62rem;color:var(--yel)">⚡dbl</span>`:''}<span class="stag ${skillCls(sk)}">${sk}</span></div>`;
+  }).join('');
+  if(bad.length) h+=`<div class="pk-lbl" style="margin-top:.3rem">✗ Unavailable</div>`+bad.map(({e,reason})=>`<div class="pk-row dim"><span style="flex:1;color:var(--tx3)">${e.name}</span><span style="font-size:.67rem;color:var(--tx3)">${reason}</span></div>`).join('');
+  if(!h) h=`<div style="padding:1rem;color:var(--tx3);font-size:.8rem">No techs available</div>`;
+  const pk=document.getElementById('picker-drop');
+  pk.innerHTML=h; pk.style.display='block';
+  const r=ev.currentTarget.getBoundingClientRect();
+  pk.style.top=(r.bottom+4)+'px'; pk.style.left=r.left+'px';
+  setTimeout(()=>document.addEventListener('click',closePicker,{once:true}),10);
+}
+function closePicker(){ document.getElementById('picker-drop').style.display='none'; pickerCtx=null; }
+function doPick(id){ if(!pickerCtx) return; addAssign(pickerCtx.date,pickerCtx.area,pickerCtx.shift,id); closePicker(); }
+
+// ═══════════════════════════════════════════════════════
+// AUTO-FILL / CLEAR
+// ═══════════════════════════════════════════════════════
+function autoFill(){
+  computeDemand(selDate).forEach(sl=>{
+    const cur=getSlots(selDate,sl.area,sl.shift);
+    if(cur.length>=sl.count) return;
+    const cands=DB.emps.filter(e=>{
+      if(!e.active||cur.includes(e.id)) return false;
+      const sk=skillOf(e.id,sl.area);
+      return availOk(e.id,selDate,sl.shift).ok&&sk&&sk!=='NONE';
+    }).sort((a,b)=>(SKILL_RANK[skillOf(b.id,sl.area)]||0)-(SKILL_RANK[skillOf(a.id,sl.area)]||0));
+    for(const e of cands){
+      if(getSlots(selDate,sl.area,sl.shift).length>=sl.count) break;
+      const working=computeDemand(selDate).some(s=>getSlots(selDate,s.area,s.shift).includes(e.id));
+      if(working&&!e.dbl) continue;
+      addAssign(selDate,sl.area,sl.shift,e.id);
+    }
+  });
+  toast('Auto-fill complete');
+}
+function clearDay(){ if(!confirm(`Clear ${selDate}?`)) return; DB.assign[selDate]={}; renderAll(); toast('Day cleared'); }
+
+// ═══════════════════════════════════════════════════════
+// WEEK NAVIGATION
+// ═══════════════════════════════════════════════════════
+function navWeek(dir){
+  const p=currentWeekStart.split('/');
+  const d=new Date(parseInt(p[2]),parseInt(p[0])-1,parseInt(p[1]));
+  d.setDate(d.getDate()+dir*7);
+  currentWeekStart=`${d.getMonth()+1}/${d.getDate()}/${d.getFullYear()}`;
+  selDate=weekDates(currentWeekStart)[1]; // default to Monday
+  const we=new Date(d); we.setDate(d.getDate()+6);
+  document.getElementById('week-label').textContent=
+    `${MONTHS[d.getMonth()].slice(0,3)} ${d.getDate()}–${we.getDate()}, ${d.getFullYear()}`;
+  renderAll(); renderDemandPage();
+}
+
+// ═══════════════════════════════════════════════════════
+// DRAWER
+// ═══════════════════════════════════════════════════════
+function openDrawer(id){
+  drawerEmpId=id;dirtyTabs=new Set();
+  const e=emp(id);
+  draft={
+    active:e.active,
+    skills:dc(DB.skills[id]||{}),
+    availBlocks:dc(DB.availBlocks[id]||[]),
+    tempOv:dc(DB.tempOv[id]||[]),
+    prefs:dc(DB.prefs[id]||{shiftPref:'none',areaPrefs:{},consec:'any',notes:''}),
+    rules:dc(DB.rules[id]||[]),
+  };
+  calState={y:2026,m:2};ruleTypeNew=null;
+  document.querySelectorAll('.dtab').forEach(b=>b.classList.remove('active'));
+  document.querySelector('.dtab[data-tab="overview"]').classList.add('active');
+  document.querySelectorAll('.dpanel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('dpanel-overview').classList.add('active');
+  document.querySelectorAll('.dirty-pip').forEach(p=>p.classList.remove('on'));
+  document.getElementById('unsaved-note').classList.remove('on');
+  buildDrawer();
+  document.getElementById('profile-drawer').classList.add('open');
+  document.getElementById('drawer-backdrop').classList.add('open');
+}
+function closeDrawer(){
+  document.getElementById('profile-drawer').classList.remove('open');
+  document.getElementById('drawer-backdrop').classList.remove('open');
+  drawerEmpId=null;draft=null;
+}
+function switchDTab(btn){
+  document.querySelectorAll('.dtab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.dpanel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(`dpanel-${btn.dataset.tab}`).classList.add('active');
+}
+function markDirty(tab){
+  dirtyTabs.add(tab);
+  const pip=document.getElementById(`pip-${tab}`);if(pip) pip.classList.add('on');
+  document.getElementById('unsaved-note').classList.add('on');
+}
+function buildDrawer(){ buildHeader();buildOverview();buildSkills();buildAvail();buildPrefs();buildRules(); }
+
+function buildHeader(){
+  const e=emp(drawerEmpId);
+  document.getElementById('d-name').textContent=e.name;
+  document.getElementById('d-id').textContent=`${e.id} · LVT · ${e.ft?'Full-time':'Part-time'}`;
+  const badges=[
+    draft.active?`<span class="dbadge" style="color:var(--grn);border-color:var(--grn-d);background:var(--grn-d)">Active</span>`:`<span class="dbadge" style="color:var(--red);border-color:var(--red-d)">Inactive</span>`,
+    e.dbl?`<span class="dbadge" style="color:var(--acc);border-color:var(--acc-d);background:var(--acc-d)">Double Shift OK</span>`:'',
+    e.maxD?`<span class="dbadge" style="color:var(--yel);border-color:var(--yel-d)">Max ${e.maxD} days/wk</span>`:'',
+    e.tSurg?`<span class="dbadge" style="color:var(--pur);border-color:var(--pur-d)">Surgery ${e.tSurg}/wk</span>`:'',
+    e.tDent?`<span class="dbadge" style="color:var(--grn);border-color:var(--grn-d)">Dental ${e.tDent}/wk</span>`:'',
+  ].filter(Boolean).join('');
+  document.getElementById('d-badges').innerHTML=badges;
+}
+
+function buildOverview(){
+  const id=drawerEmpId;const e=emp(id);
+  const h=weekHours(id);const maxH=e.maxH||0;
+  const pct=maxH?Math.min(h/maxH*100,100):0;
+  const bc=pct>90?'var(--red)':pct>70?'var(--yel)':'var(--grn)';
+  const shifts=[];
+  weekDates(currentWeekStart).forEach(date=>computeDemand(date).forEach(sl=>{
+    if(getSlots(date,sl.area,sl.shift).includes(id)) shifts.push({date,area:sl.area,shift:sl.shift,times:sl.times});
+  }));
+  document.getElementById('dpanel-overview').innerHTML=`
+    <div class="active-row">
+      <div><div style="font-size:.9rem;font-weight:600">${draft.active?'Active':'Inactive'}</div><div style="font-size:.75rem;color:var(--tx3)">${draft.active?'Available for scheduling':'Not appearing in scheduling'}</div></div>
+      <label class="big-tog"><input type="checkbox" ${draft.active?'checked':''} onchange="toggleActive(this.checked)"><div class="big-tog-track"></div><div class="big-tog-knob"></div></label>
+    </div>
+    <div class="pstat-row">
+      <div class="pstat"><div class="pstat-v" style="color:${bc}">${h.toFixed(1)}</div><div class="pstat-l">Hours</div></div>
+      <div class="pstat"><div class="pstat-v">${maxH||'—'}</div><div class="pstat-l">Max/Wk</div></div>
+      <div class="pstat"><div class="pstat-v">${shifts.length}</div><div class="pstat-l">Shifts</div></div>
+      <div class="pstat"><div class="pstat-v">0</div><div class="pstat-l">Conflicts</div></div>
+    </div>
+    ${maxH?`<div style="font-size:.68rem;color:var(--tx3);margin-bottom:4px">Hour utilization</div><div class="hbar" style="height:6px;margin-bottom:1rem"><div class="hbar-fill" style="width:${pct}%;background:${bc}"></div></div>`:''}
+    <div class="slbl">This Week</div>
+    ${shifts.length?shifts.map(s=>`<div class="sh-row"><span style="font-weight:600;min-width:68px">${s.date.replace('/2026','')}</span><span style="font-size:.67rem;font-weight:700;padding:.1rem .35rem;border-radius:3px;background:${AREA_COL[s.area]||'#888'}22;color:${AREA_COL[s.area]||'#888'}">${s.area}</span><span style="font-size:.68rem;color:var(--tx3)">${s.shift}</span><span style="font-size:.68rem;color:var(--tx3);margin-left:auto">${s.times}</span></div>`).join(''):'<div style="color:var(--tx3);font-size:.8rem">No shifts assigned this week.</div>'}`;
+}
+function toggleActive(v){draft.active=v;markDirty('overview');buildHeader();buildOverview();}
+
+function buildSkills(){
+  const ALL_AREAS_SK=['RUNWAY','SURGERY','DENTAL','SPECPROCEDURE','PROCEDURES','TRX','LAB','CIRCULATION','REHAB'];
+  document.getElementById('dpanel-skills').innerHTML=
+    `<p style="font-size:.78rem;color:var(--tx3);margin-bottom:1rem">Set competency per area.</p>
+    <div class="skill-grid">${ALL_AREAS_SK.map(area=>{
+      const v=draft.skills[area]||'';const col=skillCol(v);
+      return `<div class="skill-row"><span style="font-size:.8rem;font-weight:600">${area}</span>
+        <select class="sk-sel" onchange="updateSkill('${area}',this.value)">
+          <option value="">— not set —</option>
+          ${SKILL_LEVELS.map(l=>`<option value="${l}"${v===l?' selected':''}>${l}</option>`).join('')}
+        </select></div>`;
+    }).join('')}</div>`;
+}
+function updateSkill(area,val){draft.skills[area]=val||null;markDirty('skills');}
+
+function buildAvail(){
+  const blocks=draft.availBlocks||[];
+  const overlapPairs=[];
+  for(let i=0;i<blocks.length;i++)
+    for(let j=i+1;j<blocks.length;j++)
+      if(blocksOverlapDraft(blocks[i],blocks[j]))
+        overlapPairs.push([blocks[i].name,blocks[j].name]);
+  const overlapHTML=overlapPairs.length?`<div class="overlap-err on">⚠ Conflicting: ${overlapPairs.map(p=>`"${p[0]}" and "${p[1]}"`).join('; ')}</div>`:'';
+  const now=new Date('2026-03-02');
+  const blockCards=blocks.map((b,i)=>{
+    const bStart=new Date(b.start);const bEnd=b.end?new Date(b.end):null;
+    const isNow=now>=bStart&&(!bEnd||now<=bEnd);
+    const isFuture=bStart>now;
+    const badge=isNow?`<span class="bab-badge bab-badge-now">● Active</span>`:isFuture?`<span class="bab-badge bab-badge-future">Upcoming</span>`:`<span class="bab-badge bab-badge-past">Past</span>`;
+    const rangeTxt=b.end?`${fmtDate(b.start)} – ${fmtDate(b.end)}`:`${fmtDate(b.start)} – ongoing`;
+    const miniGrid=['Su','Mo','Tu','We','Th','Fr','Sa'].map((d,di)=>{
+      const dow=DAYS_FULL[di];const da=b.days[dow]||{am:false,pm:false};
+      return `<div class="bab-mini-col"><span class="bab-mini-lbl">${d}</span><div class="bab-mini-am ${da.am?'bm-on':'bm-off'}"></div><div class="bab-mini-pm ${da.pm?'bm-pm':'bm-off'}"></div></div>`;
+    }).join('');
+    const dayToggles=DAYS_FULL.map(dow=>{
+      const da=b.days[dow]||{am:false,pm:false};
+      return `<div class="avail-day"><span style="font-size:.82rem;font-weight:600">${dow.slice(0,3)}</span>
+        <div class="avail-slot"><span class="avail-lbl">AM</span><label class="tog"><input type="checkbox" ${da.am?'checked':''} onchange="toggleBlockDay(${i},'${dow}','am',this.checked)"><div class="tog-track"></div><div class="tog-knob"></div></label><span style="font-size:.7rem;color:var(--tx3)">${da.am?'Avail':'Off'}</span></div>
+        <div class="avail-slot"><span class="avail-lbl">PM</span><label class="tog"><input type="checkbox" ${da.pm?'checked':''} onchange="toggleBlockDay(${i},'${dow}','pm',this.checked)"><div class="tog-track"></div><div class="tog-knob"></div></label><span style="font-size:.7rem;color:var(--tx3)">${da.pm?'Avail':'Off'}</span></div>
+      </div>`;
+    }).join('');
+    return `<div class="bab-card ${isNow?'bab-now':''}" id="bab-${i}">
+      <div class="bab-hdr" onclick="toggleBab(${i})"><span class="bab-chev">▶</span><span class="bab-name">${b.name}</span><span class="bab-range-lbl">${rangeTxt}</span>${badge}<div class="bab-mini">${miniGrid}</div><button class="bab-rm" onclick="event.stopPropagation();removeBlock(${i})">✕</button></div>
+      <div class="bab-body">
+        <div class="bab-fields" style="margin-bottom:.75rem">
+          <div><label class="flbl">Block Name</label><input class="di" type="text" value="${b.name}" oninput="updateBlockName(${i},this.value)"></div>
+          <div><label class="flbl">Start Date</label><input class="di" type="date" value="${b.start}" onchange="updateBlockDate(${i},'start',this.value)"></div>
+          <div><label class="flbl">End Date</label><input class="di" type="date" value="${b.end||''}" onchange="updateBlockDate(${i},'end',this.value)"></div>
+        </div>
+        <div style="font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--tx3);margin-bottom:.5rem">Daily Availability</div>
+        ${dayToggles}
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('dpanel-avail').innerHTML=`
+    <div style="margin-bottom:.75rem">
+      <div style="font-size:.78rem;color:var(--tx3);margin-bottom:.85rem">Define named date-range availability blocks. Ranges must not overlap.</div>
+      ${overlapHTML}
+      <div class="bab-list">${blockCards||'<div class="no-bab-msg">No blocks defined.</div>'}</div>
+      <button class="btn btn-ghost btn-sm" id="add-bab-btn" onclick="openAddBlock()">＋ Add Base Availability</button>
+      <div class="add-bab-wrap" id="add-bab-wrap">
+        <div style="font-size:.8rem;font-weight:600;color:var(--tx2);margin-bottom:.85rem">New Availability Block</div>
+        <div class="bab-fields" style="margin-bottom:.75rem">
+          <div><label class="flbl">Name</label><input class="di" type="text" id="nb-name" placeholder="e.g. Summer Schedule"></div>
+          <div><label class="flbl">Start Date</label><input class="di" type="date" id="nb-start" value="2026-01-01"></div>
+          <div><label class="flbl">End Date</label><input class="di" type="date" id="nb-end"></div>
+        </div>
+        <div style="font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--tx3);margin-bottom:.5rem">Daily Availability</div>
+        ${DAYS_FULL.map(dow=>`<div class="avail-day"><span style="font-size:.82rem;font-weight:600">${dow.slice(0,3)}</span>
+          <div class="avail-slot"><span class="avail-lbl">AM</span><label class="tog"><input type="checkbox" id="nb-${dow}-am" checked><div class="tog-track"></div><div class="tog-knob"></div></label></div>
+          <div class="avail-slot"><span class="avail-lbl">PM</span><label class="tog"><input type="checkbox" id="nb-${dow}-pm" checked><div class="tog-track"></div><div class="tog-knob"></div></label></div>
+        </div>`).join('')}
+        <div style="display:flex;gap:.5rem;margin-top:.85rem">
+          <button class="btn btn-pri btn-sm" onclick="commitAddBlock()">Add Block</button>
+          <button class="btn btn-ghost btn-sm" onclick="closeAddBlock()">Cancel</button>
+        </div>
+      </div>
+    </div>
+    <div class="slbl" style="margin-top:1rem">Temporary Overrides</div>
+    <div id="d-cal"></div><div id="d-ov-list"></div>`;
+  buildCal();buildOvList();
+}
+
+function blocksOverlapDraft(a,b){
+  const aS=new Date(a.start),aE=a.end?new Date(a.end):new Date('9999-12-31');
+  const bS=new Date(b.start),bE=b.end?new Date(b.end):new Date('9999-12-31');
+  return aS<=bE&&bS<=aE;
+}
+function fmtDate(ds){if(!ds)return'—';const[y,m,d]=ds.split('-');return`${MONTHS[parseInt(m)-1].slice(0,3)} ${parseInt(d)}, ${y}`;}
+function toggleBab(i){document.getElementById(`bab-${i}`)?.classList.toggle('bab-open');}
+function updateBlockName(i,v){draft.availBlocks[i].name=v;markDirty('avail');}
+function updateBlockDate(i,field,v){draft.availBlocks[i][field]=v||null;markDirty('avail');buildAvail();}
+function toggleBlockDay(i,dow,slot,v){draft.availBlocks[i].days[dow][slot]=v;markDirty('avail');buildAvail();}
+function removeBlock(i){if(!confirm(`Remove "${draft.availBlocks[i].name}"?`))return;draft.availBlocks.splice(i,1);markDirty('avail');buildAvail();}
+function openAddBlock(){document.getElementById('add-bab-wrap').classList.add('open');document.getElementById('add-bab-btn').style.display='none';}
+function closeAddBlock(){document.getElementById('add-bab-wrap').classList.remove('open');document.getElementById('add-bab-btn').style.display='';}
+function commitAddBlock(){
+  const name=document.getElementById('nb-name')?.value?.trim();
+  const start=document.getElementById('nb-start')?.value;
+  const end=document.getElementById('nb-end')?.value||null;
+  if(!name){toast('Enter a name');return;}if(!start){toast('Start date required');return;}
+  const days={};
+  DAYS_FULL.forEach(dow=>{days[dow]={am:document.getElementById(`nb-${dow}-am`)?.checked||false,pm:document.getElementById(`nb-${dow}-pm`)?.checked||false};});
+  const newBlock={id:'ab-'+Date.now(),name,start,end,days};
+  const overlapping=draft.availBlocks.filter(b=>blocksOverlapDraft(b,newBlock));
+  if(overlapping.length){toast(`Overlaps with: ${overlapping.map(b=>b.name).join(', ')}`);return;}
+  draft.availBlocks.push(newBlock);
+  draft.availBlocks.sort((a,b)=>a.start.localeCompare(b.start));
+  markDirty('avail');closeAddBlock();buildAvail();
+}
+
+function buildCal(){
+  const el=document.getElementById('d-cal');if(!el)return;
+  const{y,m}=calState;
+  const first=new Date(y,m,1).getDay();
+  const days=new Date(y,m+1,0).getDate();
+  const today=new Date();
+  let cells=['S','M','T','W','T','F','S'].map(d=>`<div class="cdow">${d}</div>`).join('');
+  for(let i=0;i<first;i++) cells+=`<div class="cday cempty"></div>`;
+  for(let d=1;d<=days;d++){
+    const ds=`${m+1}/${d}/${y}`;
+    const ov=draft.tempOv.find(o=>o.date===ds);
+    const isToday=d===today.getDate()&&m===today.getMonth()&&y===today.getFullYear();
+    const isPast=new Date(y,m,d)<new Date(today.getFullYear(),today.getMonth(),today.getDate());
+    let cls='cday';
+    if(isPast) cls+=' cpast';
+    else if(ov?.type==='OFF') cls+=' coff';
+    else if(ov?.type==='AM_ONLY') cls+=' cam';
+    else if(ov?.type==='PM_ONLY') cls+=' cpm';
+    else if(isToday) cls+=' ctoday';
+    const dot=ov?`<div class="cdot" style="background:${ov.type==='OFF'?'var(--red)':ov.type==='AM_ONLY'?'var(--yel)':'var(--pur)'}"></div>`:'';
+    const onclick=isPast?'':` onclick="openCalPop(event,'${ds}')"`;
+    cells+=`<div class="${cls}"${onclick}><span>${d}</span>${dot}</div>`;
+  }
+  el.innerHTML=`<div class="cal-wrap"><div class="cal-hdr"><button class="cal-nav" onclick="calNav(-1)">‹</button><span style="font-weight:600;font-size:.88rem">${MONTHS[m]} ${y}</span><button class="cal-nav" onclick="calNav(1)">›</button></div><div class="cal-g">${cells}</div></div>`;
+}
+function calNav(dir){let{y,m}=calState;m+=dir;if(m>11){m=0;y++;}if(m<0){m=11;y--;}calState={y,m};buildCal();}
+function openCalPop(ev,ds){
+  ev.stopPropagation();
+  const ov=draft.tempOv.find(o=>o.date===ds);
+  const lbl=new Date(ds).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+  const pop=document.getElementById('cal-pop');
+  pop.innerHTML=`<div style="font-weight:600;font-size:.83rem;margin-bottom:.6rem">${lbl}</div>
+    ${ov?`<div class="cp-opt" onclick="setOv('${ds}',null)">✓ Clear override</div>`:''}
+    <div class="cp-opt" onclick="setOv('${ds}','OFF')"><span style="color:var(--red)">✕</span> Day Off</div>
+    <div class="cp-opt" onclick="setOv('${ds}','AM_ONLY')"><span style="color:var(--yel)">⏰</span> AM Only</div>
+    <div class="cp-opt" onclick="setOv('${ds}','PM_ONLY')"><span style="color:var(--pur)">🌙</span> PM Only</div>`;
+  pop.style.display='block';
+  const r=ev.currentTarget.getBoundingClientRect();
+  pop.style.top=(r.bottom+4)+'px';pop.style.left=Math.min(r.left,window.innerWidth-190)+'px';
+  setTimeout(()=>document.addEventListener('click',closeCalPop,{once:true}),10);
+}
+function closeCalPop(){document.getElementById('cal-pop').style.display='none';}
+function setOv(ds,type){
+  const i=draft.tempOv.findIndex(o=>o.date===ds);
+  if(!type){if(i>=0)draft.tempOv.splice(i,1);}
+  else if(i>=0) draft.tempOv[i].type=type;
+  else draft.tempOv.push({date:ds,type});
+  closeCalPop();buildCal();buildOvList();markDirty('avail');
+}
+function buildOvList(){
+  const el=document.getElementById('d-ov-list');if(!el)return;
+  const ovs=dc(draft.tempOv).sort((a,b)=>new Date(a.date)-new Date(b.date));
+  if(!ovs.length){el.innerHTML='<div style="font-size:.76rem;color:var(--tx3);margin-top:.5rem">No overrides set.</div>';return;}
+  const tl={OFF:'Day Off',AM_ONLY:'AM Only',PM_ONLY:'PM Only'};
+  const ts={OFF:'background:var(--red-d);color:var(--red)',AM_ONLY:'background:var(--yel-d);color:var(--yel)',PM_ONLY:'background:var(--pur-d);color:var(--pur)'};
+  el.innerHTML=ovs.map(ov=>{
+    const lbl=new Date(ov.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+    return `<div class="ov-row"><span style="font-weight:600;flex:1">${lbl}</span><span class="stag" style="${ts[ov.type]||''}">${tl[ov.type]||ov.type}</span><button class="ov-rm" onclick="setOv('${ov.date}',null)">✕</button></div>`;
+  }).join('');
+}
+
+function buildPrefs(){
+  const p=draft.prefs;
+  const spOpts=[{v:'AM',l:'Prefers AM',cls:'sp-am'},{v:'PM',l:'Prefers PM',cls:'sp-pm'},{v:'none',l:'No preference',cls:'sp-none'}];
+  const spBtns=spOpts.map(o=>`<button class="spref-btn ${p.shiftPref===o.v?o.cls:''}" onclick="setShiftPref('${o.v}')">${o.l}</button>`).join('');
+  const ALL_AREAS_P=['RUNWAY','SURGERY','DENTAL','SPECPROCEDURE','PROCEDURES','TRX','LAB','CIRCULATION','REHAB'];
+  const areaCards=ALL_AREAS_P.map(a=>{
+    const st=p.areaPrefs[a]||'neutral';const cls=st==='like'?'pref-like':st==='avoid'?'pref-avoid':'';
+    return `<div class="pref-card ${cls}" onclick="cycleAreaPref('${a}')"><span style="font-size:.8rem;font-weight:600">${a}</span><span>${st==='like'?'✓':st==='avoid'?'✕':'·'}</span></div>`;
+  }).join('');
+  const cOpts=[{v:'any',l:'Any'},{v:'grouped',l:'Grouped'},{v:'spread',l:'Spread out'}];
+  const cBtns=cOpts.map(o=>`<button class="spref-btn ${p.consec===o.v?'sp-none':''}" onclick="setConsec('${o.v}')">${o.l}</button>`).join('');
+  document.getElementById('dpanel-prefs').innerHTML=`
+    <div class="slbl">Shift Preference</div><div class="spref-row">${spBtns}</div>
+    <div class="slbl">Area Preferences</div><div class="pref-area-grid">${areaCards}</div>
+    <div class="slbl">Consecutive Days</div><div class="spref-row">${cBtns}</div>
+    <div class="slbl">Scheduler Notes</div>
+    <textarea id="pref-notes" oninput="updatePrefNotes(this.value)">${p.notes||''}</textarea>`;
+}
+function setShiftPref(v){draft.prefs.shiftPref=v;markDirty('prefs');buildPrefs();}
+function cycleAreaPref(a){const cur=draft.prefs.areaPrefs[a]||'neutral';draft.prefs.areaPrefs[a]=cur==='neutral'?'like':cur==='like'?'avoid':'neutral';markDirty('prefs');buildPrefs();}
+function setConsec(v){draft.prefs.consec=v;markDirty('prefs');buildPrefs();}
+function updatePrefNotes(v){draft.prefs.notes=v;markDirty('prefs');}
+
+function buildRules(){
+  const rules=draft.rules;
+  document.getElementById('dpanel-rules').innerHTML=`
+    <p style="font-size:.78rem;color:var(--tx3);margin-bottom:1rem">Custom per-tech scheduling rules.</p>
+    <div id="rules-list">${rules.length?rules.map((r,i)=>{const rt=RULE_TYPES[r.type]||{l:'Rule',c:'rt-note'};return`<div class="rule-item"><div style="flex:1"><span class="rule-type-badge ${rt.c}">${rt.l}</span><div style="font-size:.82rem">${r.text}</div></div><button class="rule-rm" onclick="removeRule(${i})">✕</button></div>`;}).join(''):'<div style="font-size:.8rem;color:var(--tx3);margin-bottom:.75rem">No custom rules.</div>'}</div>
+    <button class="btn btn-ghost btn-sm" id="add-rule-btn" onclick="toggleAddRuleForm()">＋ Add Rule</button>
+    <div class="add-rule-box" id="add-rule-box" style="display:none">
+      <div class="rule-type-btns">
+        <button class="rtbtn" data-rt="max" onclick="pickRuleType(this)">Max Shifts / Area</button>
+        <button class="rtbtn" data-rt="pair" onclick="pickRuleType(this)">DVM Pairing</button>
+        <button class="rtbtn" data-rt="require" onclick="pickRuleType(this)">Require Mentor</button>
+        <button class="rtbtn" data-rt="restrict" onclick="pickRuleType(this)">Restrict Area</button>
+        <button class="rtbtn" data-rt="note" onclick="pickRuleType(this)">Note</button>
+      </div>
+      <div id="rule-fields"></div>
+      <div style="display:flex;gap:.5rem;margin-top:.75rem">
+        <button class="btn btn-pri btn-sm" onclick="commitRule()">Add Rule</button>
+        <button class="btn btn-ghost btn-sm" onclick="toggleAddRuleForm()">Cancel</button>
+      </div>
+    </div>`;
+}
+function toggleAddRuleForm(){
+  const box=document.getElementById('add-rule-box');const btn=document.getElementById('add-rule-btn');
+  const open=box.style.display==='none';box.style.display=open?'block':'none';
+  btn.textContent=open?'✕ Cancel':'＋ Add Rule';
+  if(open){ruleTypeNew=null;document.getElementById('rule-fields').innerHTML='';}
+}
+function pickRuleType(btn){
+  document.querySelectorAll('.rtbtn').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');
+  ruleTypeNew=btn.dataset.rt;
+  const ALL_AR=['RUNWAY','SURGERY','DENTAL','SPECPROCEDURE','PROCEDURES','TRX','LAB','CIRCULATION','REHAB'];
+  const fm={
+    max:`<div class="form-row"><div><label class="flbl">Area</label><select id="rf-area">${ALL_AR.map(a=>`<option>${a}</option>`).join('')}</select></div><div><label class="flbl">Max/week</label><input type="number" id="rf-max" value="1" min="0" max="7"></div></div>`,
+    pair:`<div style="margin-bottom:.5rem"><label class="flbl">DVM</label><input type="text" id="rf-dvm" placeholder="e.g. Dr. Smith"></div><div><label class="flbl">Type</label><select id="rf-pair-type"><option value="prefer">Prefer together</option><option value="avoid">Avoid together</option></select></div>`,
+    require:`<div><label class="flbl">Area</label><select id="rf-req-area">${ALL_AR.map(a=>`<option>${a}</option>`).join('')}</select></div>`,
+    restrict:`<div style="margin-bottom:.5rem"><label class="flbl">Restrict from</label><select id="rf-restr-area">${ALL_AR.map(a=>`<option>${a}</option>`).join('')}</select></div><div><label class="flbl">Reason</label><input type="text" id="rf-reason"></div>`,
+    note:`<div><label class="flbl">Note</label><textarea id="rf-note"></textarea></div>`,
+  };
+  document.getElementById('rule-fields').innerHTML=fm[ruleTypeNew]||'';
+}
+function commitRule(){
+  if(!ruleTypeNew){toast('Select a rule type');return;}
+  let text='';
+  if(ruleTypeNew==='max'){const a=document.getElementById('rf-area')?.value,m=document.getElementById('rf-max')?.value;text=`Max ${m} ${a} shifts/week`;}
+  else if(ruleTypeNew==='pair'){const d=document.getElementById('rf-dvm')?.value,t=document.getElementById('rf-pair-type')?.value;if(!d){toast('Enter DVM name');return;}text=`${t==='prefer'?'Prefer':'Avoid'} pairing: ${d}`;}
+  else if(ruleTypeNew==='require'){text=`Requires MENTOR in ${document.getElementById('rf-req-area')?.value}`;}
+  else if(ruleTypeNew==='restrict'){const a=document.getElementById('rf-restr-area')?.value,r=document.getElementById('rf-reason')?.value;text=`Do not schedule in ${a}${r?' — '+r:''}`;}
+  else if(ruleTypeNew==='note'){const n=document.getElementById('rf-note')?.value?.trim();if(!n){toast('Enter note');return;}text=n;}
+  draft.rules.push({id:Date.now(),type:ruleTypeNew,text});markDirty('rules');buildRules();
+}
+function removeRule(i){draft.rules.splice(i,1);markDirty('rules');buildRules();}
+
+function saveDraft(){
+  const id=drawerEmpId;const e=emp(id);
+  e.active=draft.active;
+  DB.skills[id]=dc(draft.skills);
+  DB.availBlocks[id]=dc(draft.availBlocks);
+  DB.tempOv[id]=dc(draft.tempOv);
+  DB.prefs[id]=dc(draft.prefs);
+  DB.rules[id]=dc(draft.rules);
+  toast(`${e.name} — saved ✓`);closeDrawer();renderAll();
+}
+function discardDraft(){if(dirtyTabs.size>0&&!confirm('Discard unsaved changes?'))return;closeDrawer();}
+
+// ═══════════════════════════════════════════════════════
+// NAV
+// ═══════════════════════════════════════════════════════
+function showPage(name, btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if(btn) btn.classList.add('active');
+  if(name==='settings'){ renderAreaRules();renderDrSchedule();renderWeekAssign(); }
+  if(name==='demand') renderDemandPage();
+}
+function selDay(d){selDate=d;renderDayList();renderDayDetail();renderStats();}
+function switchSPanel(name, btn){
+  document.querySelectorAll('.spanel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('spanel-'+name)?.classList.add('active');
+  document.querySelectorAll('.snav-item').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  else document.querySelector(`.snav-item[data-sp="${name}"]`)?.classList.add('active');
+  if(name==='area-rules') renderAreaRules();
+  if(name==='doc-schedule') renderDrSchedule();
+  if(name==='week-assign') renderWeekAssign();
+}
+
+// ═══════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════
+function toast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;
+  t.style.background='var(--grn-d)';t.style.color='var(--grn)';t.style.border='1px solid #1a5c40';
+  t.style.display='block';clearTimeout(t._t);t._t=setTimeout(()=>t.style.display='none',2200);
+}
+
+// ═══════════════════════════════════════════════════════
+// GLOBAL CLICK DELEGATION
+// ═══════════════════════════════════════════════════════
+document.addEventListener('click',function(ev){
+  const card=ev.target.closest('.rc[data-empid]');
+  if(card){openDrawer(card.dataset.empid);return;}
+  const pk=document.getElementById('picker-drop');
+  if(pk.style.display!=='none'&&!pk.contains(ev.target)) closePicker();
+  const cp=document.getElementById('cal-pop');
+  if(cp.style.display!=='none'&&!cp.contains(ev.target)) closeCalPop();
+  const dp=document.getElementById('doc-picker');
+  if(dp.style.display!=='none'&&!dp.contains(ev.target)) closeDocPicker();
+});
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+// Fix syntax error in get accessor — use function instead
+Object.defineProperty(window,'WEEK_DATES',{get:()=>weekDates(currentWeekStart)});
+renderStats();renderDayList();renderDayDetail();renderRoster();
+</script>
+</body>
+</html>
 
